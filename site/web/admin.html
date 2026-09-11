@@ -87,6 +87,17 @@
     </div>
   </section>
 
+  <section id="launch-box" hidden>
+    <h2>发射</h2>
+    <div class="sub" style="margin-bottom:6px">按钮把指令写进 live.json；你电脑上运行的 <code>tools/launch_agent.py</code> 收到后启动果蝇、录像、按 START。真发射还要求本机 .env 里 <code>FLY_RH_LIVE=1</code>、<code>FLY_FLAP_COIN=launch</code>，钱包有 BNB——代理会检查并把原因写回这里。</div>
+    <div class="bar">
+      <button id="rehearse">彩排（干跑，不签名）</button>
+      <button id="launch" class="go">发射代币</button>
+      <span id="launch-msg" class="msg"></span>
+    </div>
+    <div id="agent" class="msg" style="margin-top:12px"></div>
+  </section>
+
   <section id="deploy-box" hidden>
     <h2>部署</h2>
     <div class="sub" style="margin-bottom:6px">触发仓库的 <code>deploy site</code> 工作流：从 main 拉代码，<code>vercel deploy --prod</code>。约 1 分钟。</div>
@@ -124,6 +135,9 @@ function fill(live) {
   $('tx').value = L.tx || '';
   $('step').value = L.step || '';
   $('stream').value = live.stream || '';
+  const ago = t => t ? Math.max(0, Math.round(Date.now() / 1000 - t)) + ' 秒前' : '';
+  $('agent').textContent = (L.command ? `指令 "${L.command}" 已写入，等待本机代理接收（${ago(L.command_at)}）。` : '')
+    + (L.agent ? `代理：${L.agent}（${ago(L.agent_at)}）` : '代理：还没有任何回报。本机要先运行 py tools/launch_agent.py');
   const p = $('state-pill'); p.textContent = L.state || 'not_launched'; p.className = 'pill ' + (L.state || '');
 }
 
@@ -132,7 +146,7 @@ async function loadAll(label) {
   if (!j.ok) throw new Error(j.error);
   try { localStorage.setItem('flybrain_admin', tokEl.value); } catch (e) {}
   fill(j.live);
-  $('form').hidden = false; $('deploy-box').hidden = false;
+  $('form').hidden = false; $('deploy-box').hidden = false; $('launch-box').hidden = false;
   say('who', (label || '已登录') + ' · ' + j.repo + ' / site/web/live.json', 'ok');
   refreshRuns();
 }
@@ -235,6 +249,30 @@ $('deploy').onclick = async () => {
   $('deploy').disabled = false;
 };
 $('refresh').onclick = refreshRuns;
+
+// The launch buttons write a command; the page then polls live.json every
+// 5 s for a while so the agent's progress shows up here.
+async function sendCommand(cmd) {
+  const label = cmd === 'launch' ? '发射' : '彩排';
+  if (cmd === 'launch') {
+    const typed = prompt('这会让本机代理真的签名并广播（前提是 .env 里 FLY_RH_LIVE=1）。输入 LAUNCH 确认：');
+    if (typed !== 'LAUNCH') return;
+  } else if (!confirm('开始一次彩排（干跑）？')) return;
+  $('launch').disabled = true; $('rehearse').disabled = true; say('launch-msg', '写入指令…');
+  try {
+    const j = await api('save', { patch: { launch: { command: cmd } }, note: label + ' button' });
+    if (!j.ok) throw new Error(j.error);
+    fill(j.live);
+    say('launch-msg', '指令已写入，等代理接收。', 'ok');
+    let n = 0; const t = setInterval(async () => {
+      try { const g = await api('get'); if (g.ok) fill(g.live); } catch (e) {}
+      if (++n > 120) clearInterval(t);
+    }, 5000);
+  } catch (e) { say('launch-msg', String(e.message || e), 'bad'); }
+  $('launch').disabled = false; $('rehearse').disabled = false;
+}
+$('launch').onclick = () => sendCommand('launch');
+$('rehearse').onclick = () => sendCommand('rehearse');
 
 async function refreshRuns() {
   try {

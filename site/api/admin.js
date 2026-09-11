@@ -108,6 +108,15 @@ function merge(cur, patch) {
     if (st && !/^\d{1,2}$/.test(st)) throw new Error('step must be a number');
     out.launch.step = st;
   }
+  // the launch button writes a command; the agent on the launch PC clears
+  // it and writes back what it did
+  if ('command' in L) {
+    const c = String(L.command || '');
+    if (!['', 'launch', 'rehearse'].includes(c)) throw new Error('command must be launch | rehearse');
+    out.launch.command = c;
+    if (c) out.launch.command_at = Math.floor(Date.now() / 1000);
+  }
+  if ('agent' in L) { out.launch.agent = String(L.agent || '').slice(0, 200); out.launch.agent_at = Math.floor(Date.now() / 1000); }
   return out;
 }
 
