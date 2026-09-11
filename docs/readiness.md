@@ -130,6 +130,19 @@ roam.py's own tunnel code is not used: on current cloudflared it mistakes
 repo. For a picture that survives this PC being off, `site/server/` and the
 Dockerfile are ready for Railway or any container host — **需要你决定**.
 
+**8a. /admin 后台 — 通过.** https://flybrain-bsc.vercel.app/admin, behind
+`ADMIN_TOKEN` (local copy in `site/.admin-token`, gitignored). Edits
+`site/web/live.json` in the repo through the GitHub API (CA, block, launch
+state, banner text and link, stream address) — `/api/state` and the page
+read that file, so a CA update needs no redeploy. The 部署 button dispatches
+the repo's `deploy site` workflow (`.github/workflows/deploy.yml`, `vercel
+deploy --prod` with the repo secrets `VERCEL_TOKEN` / `VERCEL_ORG_ID` /
+`VERCEL_PROJECT_ID`); pushes that change `site/` code also deploy. Tested
+2026-09-11: wrong token → 401; get, save (commit `admin: update live.json`),
+deploy (workflow run, success in ~50 s), status all pass; an invalid CA is
+rejected before anything is written. Vercel's own Git integration is not
+used — it needs a GitHub login connection on your Vercel account.
+
 **9. 未发射状态 — 通过（本地）.** With `FLY_TOKEN` unset the state service
 answers `launched: false, token: null` and the page shows "not launched yet"
 for the contract, `BNB` / `0 %` / `1,000,000,000 at launch`, a working

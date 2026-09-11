@@ -137,21 +137,23 @@ this wallet happened less than `FLY_FLAP_COOLDOWN_S` (3600 s) ago.
 1. In `.env` set `FLY_RH_LIVE=0` again. Restart nothing — the rig is done.
 2. `py bscwallet.py show` — the balance is lower by the gas (≈0.0001–0.002 BNB).
 3. Open `https://bscscan.com/tx/<hash>` from the log. Status **Success**.
-4. Site (https://flybrain-bsc.vercel.app, Vercel project `flybrain`): in
-   `site/web/live.json` set `launch.state` to `"launched"` and `launch.url`
-   to the flap.sh token page; commit and push (`git add site/web/live.json
-   launch/launch.json && git commit -m "launch" && git push`). Then set the
-   token on the Vercel project and redeploy so the token table fills in:
+4. Site: open **https://flybrain-bsc.vercel.app/admin**, enter the admin
+   token (the file `site/.admin-token` on this machine; it is the
+   `ADMIN_TOKEN` env on the Vercel project), press 载入当前状态, then:
+   - paste the contract into 合约地址 CA, the block into 发射区块,
+   - set 状态 to `launched` and the 横幅链接 to the flap.sh token page,
+   - press 保存到仓库.
 
-   ```bash
-   vercel env add FLY_TOKEN production          # paste the contract address
-   vercel env add FLY_TOKEN_BLOCK production    # the launch block, hex or decimal
-   vercel --cwd site --prod
-   ```
+   That commits `site/web/live.json` to the repo; the page and `/api/state`
+   read it within a minute — **no redeploy needed for a CA change**. The
+   部署到生产 button is only for code changes: it runs the repo's
+   `deploy site` workflow (`vercel deploy --prod`, about 50 s) and shows the
+   run's progress. Before the launch, the same page with 状态 `launching`
+   and the stream link turns the banner on.
 
-   (Run those from the `site/` directory, which is linked to the project.)
-   Before the launch, the same two commands with `launch.state:
-   "launching"` and `launch.url` set to your stream turn the banner on.
+   Command-line equivalent, if the page is unavailable: edit
+   `site/web/live.json` by hand, `git add site/web/live.json
+   launch/launch.json && git commit -m "launch" && git push`.
 5. `py voice.py --once --dry` — the narrator now reads the coin from chain.
 
 ## 6. If it goes wrong
