@@ -7,9 +7,10 @@
 <meta name="description" content="165,122 neurons of a real fruit fly connectome, loose on the internet and learning.">
 <meta property="og:title" content="FLAPBRAIN">
 <meta property="og:description" content="165,122 neurons of a real fruit fly connectome, loose on the internet and learning.">
-<meta property="og:image" content="/fly.png">
+<meta property="og:image" content="https://flybrain-bsc.vercel.app/favicon.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/fly.png">
+<link rel="icon" type="image/png" sizes="256x256" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -572,7 +573,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 <footer>
   <div class="wrap">
     <div class="links">
-      <a href="https://github.com/FlapBrain/flycoinrh">source</a>
+      <a href="https://github.com/FlapBrain/FlapBrain">source</a>
       <a href="https://github.com/fruitflydev/flycoinrh">forked from fruitflydev/flycoinrh</a>
       <a id="f-scan" href="https://bscscan.com">explorer</a>
     </div>
@@ -1078,7 +1079,7 @@ async function findStableStream(){
    Read from the repo first (the fly writes the address there and this page
    is only redeployed when someone deploys it), then from this deployment. */
 const LIVE_SOURCES = [
-  'https://raw.githubusercontent.com/FlapBrain/flycoinrh/main/site/web/live.json',
+  'https://raw.githubusercontent.com/FlapBrain/FlapBrain/main/site/web/live.json',
   'live.json',
 ];
 async function readLive(){

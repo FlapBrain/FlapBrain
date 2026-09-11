@@ -9,13 +9,13 @@
 // Environment (set on the Vercel project):
 //   ADMIN_TOKEN       the password typed into /admin
 //   GITHUB_TOKEN      a token with contents:write on the repo below
-//   GITHUB_REPO       owner/name, default FlapBrain/flycoinrh
+//   GITHUB_REPO       owner/name, default FlapBrain/FlapBrain
 //   DEPLOY_HOOK_URL   the project's deploy hook (main branch)
 
 import { timingSafeEqual, createHmac } from 'node:crypto';
 import { verifyMessage } from 'ethers';
 
-const REPO = process.env.GITHUB_REPO || 'FlapBrain/flycoinrh';
+const REPO = process.env.GITHUB_REPO || 'FlapBrain/FlapBrain';
 const PATH = 'site/web/live.json';
 const API = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
 

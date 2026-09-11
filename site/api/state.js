@@ -9,7 +9,7 @@
 
 const RPC = process.env.FLY_BSC_RPC || 'https://bsc-dataseed.binance.org';
 const WALLET = process.env.FLY_WALLET || '';
-const REPO = process.env.GITHUB_REPO || 'FlapBrain/flycoinrh';
+const REPO = process.env.GITHUB_REPO || 'FlapBrain/FlapBrain';
 const LIVE_URL = `https://raw.githubusercontent.com/${REPO}/main/site/web/live.json`;
 
 // The token address comes from live.json in the repo (what /admin edits),
