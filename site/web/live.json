@@ -6,8 +6,8 @@
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
   "url": "",
   "block": "",
-  "agent": "发射未完成：error。FLY_RH_LIVE 已改回 0，看 build/agent 日志。",
-  "agent_at": 1789124149,
+  "agent": "待命：本机代理在线，等指令。",
+  "agent_at": 1789124220,
   "command": "",
   "command_at": 1789123997,
   "step": ""
