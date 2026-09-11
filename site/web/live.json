@@ -6,8 +6,8 @@
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
   "url": "",
   "block": "",
-  "agent": "待命：本机代理在线，等指令。",
-  "agent_at": 1789124220,
+  "agent": "警告：钱包 0xa972…b672 是 0 BNB。会签名并尝试广播，节点会以 insufficient funds 拒绝——只能验证路径，不会创建代币。",
+  "agent_at": 1789124232,
   "command": "launch",
   "command_at": 1789124228,
   "step": ""
