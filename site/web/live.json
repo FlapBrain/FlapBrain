@@ -6,10 +6,10 @@
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
   "url": "",
   "block": "",
-  "agent": "果蝇在页面上，第 18/18 步",
-  "agent_at": 1789124074,
+  "agent": "发射未完成：error。FLY_RH_LIVE 已改回 0，看 build/agent 日志。",
+  "agent_at": 1789124149,
   "command": "",
   "command_at": 1789123997,
-  "step": "18"
+  "step": ""
  }
 }
