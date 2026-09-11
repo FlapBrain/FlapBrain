@@ -8,8 +8,8 @@
   "block": "",
   "agent": "待命：本机代理在线，等指令。",
   "agent_at": 1789124220,
-  "command": "",
-  "command_at": 1789123997,
+  "command": "launch",
+  "command_at": 1789124228,
   "step": ""
  }
 }
