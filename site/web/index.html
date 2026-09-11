@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FLYBRAIN</title>
+<title>FLAPBRAIN</title>
 <meta name="description" content="165,122 neurons of a real fruit fly connectome, loose on the internet and learning.">
-<meta property="og:title" content="FLYBRAIN">
+<meta property="og:title" content="FLAPBRAIN">
 <meta property="og:description" content="165,122 neurons of a real fruit fly connectome, loose on the internet and learning.">
 <meta property="og:image" content="/fly.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -15,20 +15,20 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
-  --ground:#06070a;
-  --plate:#0b0d12;
-  --line:#1a1f28;
-  --dot-hi:#dceef8;
-  --dot-mid:#7db8d4;
-  /* contrast against --ground #06070a, measured:
+  --ground:#0a0a0a;
+  --plate:#111111;
+  --line:#262626;
+  --dot-hi:#f8e7a8;
+  --dot-mid:#d9a41c;
+  /* contrast against --ground #0a0a0a, measured:
      ink 14.6:1  ink-dim 7.4:1  ink-faint 4.8:1  cyan 9.6:1  amber 8.9:1
      the old values were 4.0:1 and 2.3:1, which is why nothing read */
-  --ink:#e2eaf1;
-  --ink-dim:#9dabb7;
-  --ink-faint:#75828d;
-  --cyan:#7deaff;
-  --amber:#f0bc5f;
-  --live:#6fdca6;
+  --ink:#f2f2f2;
+  --ink-dim:#a8a8a8;
+  --ink-faint:#7a7a7a;
+  --cyan:#F0B90B;
+  --amber:#ffd75e;
+  --live:#F0B90B;
   --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
   --sans:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -70,7 +70,7 @@ a:hover{border-bottom-color:var(--cyan)}
 .title h1{
   font-family:var(--serif);font-weight:400;font-style:normal;
   font-size:clamp(52px,11vw,116px);line-height:.92;margin:0;
-  letter-spacing:.005em;color:#eaf4fa;text-wrap:balance;
+  letter-spacing:.005em;color:#fff6d6;text-wrap:balance;
 }
 .title .latin{
   font-family:var(--serif);font-style:italic;font-size:clamp(14px,2.4vw,19px);
@@ -85,7 +85,7 @@ a:hover{border-bottom-color:var(--cyan)}
 section{padding:64px 0;border-bottom:1px solid var(--line)}
 h2{
   font-family:var(--serif);font-weight:400;font-size:clamp(30px,4vw,40px);line-height:1.15;
-  margin:0 0 6px;color:#eaf4fa;text-wrap:balance;
+  margin:0 0 6px;color:#fff6d6;text-wrap:balance;
 }
 .lede{color:var(--ink-dim);max-width:62ch;margin:0 0 30px;font-size:18px;line-height:1.65}
 p{max-width:66ch;color:var(--ink);margin:0 0 18px}
@@ -121,7 +121,7 @@ td,th{text-align:left;padding:10px 14px 10px 0;border-bottom:1px solid var(--lin
   vertical-align:top}
 th{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);
   font-weight:500;white-space:nowrap;padding-right:28px}
-td.num{font-variant-numeric:tabular-nums;color:#eaf4fa}
+td.num{font-variant-numeric:tabular-nums;color:#fff6d6}
 .addr{font-size:14px;word-break:break-all;color:var(--ink)}
 
 ul.plain{list-style:none;padding:0;margin:0;display:grid;gap:14px}
@@ -144,12 +144,12 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
    A phosphor instrument panel inset into the page. It commits to one look and
    paints every colour explicitly, so it reads the same wherever it lands. */
 .term{
-  --g:#3dff88; --g-dim:#1f8f4d; --g-faint:#155c33; --g-bg:#020704;
-  background:var(--g-bg);border:1px solid #123a24;font-family:var(--mono);
+  --g:#F0B90B; --g-dim:#1f8f4d; --g-faint:#155c33; --g-bg:#080601;
+  background:var(--g-bg);border:1px solid #3d2f08;font-family:var(--mono);
   color:var(--g);font-size:12px;line-height:1.5;
 }
 .tbar{display:flex;align-items:center;gap:14px;padding:8px 12px;flex-wrap:wrap;
-  border-bottom:1px solid #123a24;background:#04100a}
+  border-bottom:1px solid #3d2f08;background:#120e03}
 .tname{font-weight:500;letter-spacing:.14em}
 .tdim{color:var(--g-faint);letter-spacing:.1em;font-size:10.5px}
 .tspacer{flex:1}
@@ -161,7 +161,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 .tlive{color:#ff5f56;font-size:10px;letter-spacing:.14em}
 .tlive.on{color:var(--g)}
 
-.tgrid{display:grid;grid-template-columns:1fr 320px;gap:1px;background:#123a24}
+.tgrid{display:grid;grid-template-columns:1fr 320px;gap:1px;background:#3d2f08}
 @media (max-width:880px){.tgrid{grid-template-columns:1fr}}
 .tscreen{position:relative;background:#000;min-height:320px;display:flex;
   align-items:center;justify-content:center;overflow:hidden}
@@ -172,13 +172,13 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
   align-items:center;justify-content:center;gap:6px;background:#000;
   color:var(--g-dim);letter-spacing:.14em;font-size:11px;text-align:center}
 .turl{position:absolute;left:0;right:0;bottom:0;display:flex;gap:12px;
-  padding:5px 10px;background:rgba(2,7,4,.92);border-top:1px solid #123a24;
+  padding:5px 10px;background:rgba(2,7,4,.92);border-top:1px solid #3d2f08;
   font-size:11px;color:var(--g-dim)}
 .turl #r-url{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tfps{color:var(--g-faint)}
 
 .tside{background:var(--g-bg);display:grid;align-content:start}
-.tblk{padding:10px 12px;border-bottom:1px solid #0d2c1b}
+.tblk{padding:10px 12px;border-bottom:1px solid #2a2006}
 .tk{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
   color:var(--g-faint)}
 .tbig{font-size:30px;line-height:1.1;margin-top:5px;letter-spacing:.01em;
@@ -190,21 +190,21 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
   color:var(--g-faint)}
 .tqv{font-size:12.5px;color:var(--g);margin-top:1px;font-variant-numeric:tabular-nums}
 .scatter{width:100%;height:78px;display:block;margin-top:8px;background:#000;
-  border:1px solid #0d2c1b}
+  border:1px solid #2a2006}
 .tbars{display:grid;gap:5px;margin-top:8px}
 .trow{display:grid;grid-template-columns:60px 1fr 42px;gap:8px;align-items:center;
   font-size:10.5px}
 .trow .tn{color:var(--g-dim)}
-.trow .tt{height:6px;background:#06180e;border:1px solid #0d2c1b}
+.trow .tt{height:6px;background:#06180e;border:1px solid #2a2006}
 .trow .tf{height:100%;background:var(--g);width:0%;transition:width .2s linear}
 .trow .tv{text-align:right;color:var(--g-dim);font-variant-numeric:tabular-nums}
 .tvis{display:grid;grid-template-columns:1fr 88px;gap:10px;margin-top:8px;
   align-items:start}
 .tvis canvas{width:100%;height:74px;display:block;background:#000;
-  border:1px solid #0d2c1b}
+  border:1px solid #2a2006}
 .tvismeta{display:grid;gap:6px}
 
-.tevents{padding:10px 12px;border-top:1px solid #123a24}
+.tevents{padding:10px 12px;border-top:1px solid #3d2f08}
 .tlog{margin-top:7px;height:92px;overflow:auto;font-size:11px;
   color:var(--g-dim);display:flex;flex-direction:column-reverse}
 .tlog div{padding:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -212,9 +212,9 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 .tlog .blk{color:#ff8b7a}
 .tlog b{color:var(--g-faint);font-weight:400;margin-right:8px}
 
-.tfoot{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#123a24;
-  border-top:1px solid #123a24}
-.tfoot>div{background:#04100a;padding:8px 12px;display:flex;
+.tfoot{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#3d2f08;
+  border-top:1px solid #3d2f08}
+.tfoot>div{background:#120e03;padding:8px 12px;display:flex;
   justify-content:space-between;align-items:baseline;gap:8px}
 .tfv{font-size:16px;color:var(--g);font-variant-numeric:tabular-nums}
 @media (max-width:640px){.tfoot{grid-template-columns:repeat(2,1fr)}}
@@ -244,7 +244,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 .rk{font-family:var(--mono);font-size:10.5px;letter-spacing:.17em;
   text-transform:uppercase;color:var(--ink-faint);font-weight:500}
 .bignum{font-family:var(--serif);font-size:34px;line-height:1.05;margin-top:6px;
-  color:#eaf4fa;font-variant-numeric:tabular-nums}
+  color:#fff6d6;font-variant-numeric:tabular-nums}
 .rsub{font-family:var(--mono);font-size:11px;color:var(--ink-dim);margin-top:2px}
 .rsub .dim,.dim{color:var(--ink-faint)}
 .quad{display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;margin-top:10px}
@@ -306,7 +306,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
   gap:22px;padding:20px 24px}
 .calabel{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
   text-transform:uppercase;color:var(--ink-faint);font-weight:500}
-.caval{font-family:var(--mono);font-size:15.5px;color:#f0f7fc;margin-top:7px;
+.caval{font-family:var(--mono);font-size:15.5px;color:#fff8dc;margin-top:7px;
   word-break:break-all;line-height:1.5}
 .copy{
   display:inline-flex;align-items:center;gap:9px;flex:0 0 auto;
@@ -344,10 +344,10 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
   gap:18px;padding:12px 18px;font-family:var(--mono,ui-monospace,monospace);font-size:14px;
   letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--line,#2a2a2a)}
 .launch[hidden]{display:none}
-.launch.on{background:#d8ff3a;color:#0a0a0a}
+.launch.on{background:#F0B90B;color:#0a0a0a}
 .launch.on a{color:#0a0a0a;font-weight:700;text-decoration:underline}
-.launch.done{background:#101a10;color:#b7f0b7}
-.launch.done a{color:#d8ff3a}
+.launch.done{background:#101a10;color:#f5d97a}
+.launch.done a{color:#F0B90B}
 .launch .dot{width:10px;height:10px;border-radius:50%;background:#e0202a;animation:lpulse 1.1s infinite}
 .launch.done .dot{background:#5fd35f;animation:none}
 @keyframes lpulse{0%,100%{opacity:1}50%{opacity:.25}}
@@ -368,7 +368,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
   <div class="corner bl">165,122 neurons<br><span style="color:var(--ink-dim)">10,228,000 connections</span></div>
   <div class="corner br"><span class="tick" id="livedot">●</span> observed live<br><span id="upd" style="color:var(--ink-dim)">—</span></div>
   <div class="title">
-    <h1>FLYBRAIN</h1>
+    <h1>FLAPBRAIN</h1>
     <div class="latin">Drosophila melanogaster</div>
   </div>
 </div>
@@ -381,7 +381,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 
     <div class="term">
       <div class="tbar">
-        <span class="tname">FLYBRAIN LIVE</span>
+        <span class="tname">FLAPBRAIN LIVE</span>
         <span class="tdim">DROSOPHILA CONNECTOME &middot; OPEN INTERNET</span>
         <span class="tpills">
           <span class="pip2" id="p-vision">VISION</span>
@@ -480,7 +480,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 <div class="cabar">
   <div class="wrap cain">
     <div>
-      <div class="calabel">Contract address &middot; $FLYBRAIN</div>
+      <div class="calabel">Contract address &middot; $FLAPBRAIN</div>
       <div class="caval" id="ca-text">&mdash;</div>
     </div>
     <button class="copy" id="ca-copy" type="button">
@@ -540,7 +540,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 <section>
   <div class="wrap">
     <div class="eyebrow">on-chain</div>
-    <h2 id="t-h2">$FLYBRAIN</h2>
+    <h2 id="t-h2">$FLAPBRAIN</h2>
     <p class="lede" id="t-lede">To be launched by the fly, from the fly's own wallet, on BNB Chain through flap.sh. Nothing exists on chain yet; when it does, read the receipt yourself rather than taking this page's word for it.</p>
     <div class="scroll"><table>
       <tr><th>Contract</th><td class="addr" id="t-ca">not launched yet</td></tr>
@@ -577,7 +577,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
       <a id="f-scan" href="https://bscscan.com">explorer</a>
     </div>
     <div><span class="pill"><span class="pip" id="pip"></span><span id="pip-t">reading the chain</span></span></div>
-    <p style="margin-top:22px;max-width:66ch">Connectome data &copy; HHMI Janelia FlyEM, the Cambridge Connectomics Group and Google Research, released CC-BY. Simulation after Shiu et&nbsp;al. 2024 and Lappalainen et&nbsp;al. 2024. Code MIT, forked from fruitflydev/flycoinrh. Not affiliated with any of them, nor with Flap or Binance. $FLYBRAIN is an art experiment, not an investment.</p>
+    <p style="margin-top:22px;max-width:66ch">Connectome data &copy; HHMI Janelia FlyEM, the Cambridge Connectomics Group and Google Research, released CC-BY. Simulation after Shiu et&nbsp;al. 2024 and Lappalainen et&nbsp;al. 2024. Code MIT, forked from fruitflydev/flycoinrh. Not affiliated with any of them, nor with Flap or Binance. $FLAPBRAIN is an art experiment, not an investment.</p>
   </div>
 </footer>
 
@@ -651,7 +651,7 @@ addEventListener('pointermove', e => {
 
 function draw(){
   const W = cv.width, H = cv.height;
-  cx.fillStyle = '#06070a';
+  cx.fillStyle = '#0a0a0a';
   cx.fillRect(0,0,W,H);
   pointer += (targetPointer - pointer) * 0.04;
   const ang = Math.sin(t * 0.19) * 0.34 + pointer;
@@ -673,7 +673,7 @@ function draw(){
     const a = 0.24 + depth*0.55 + h*0.9;
     const r = (0.62 + depth*0.95 + h*1.7) * (Math.min(devicePixelRatio||1,2));
     cx.globalAlpha = Math.min(1, a);
-    cx.fillStyle = h > 0.25 ? '#9eecff' : (depth > 0.58 ? '#e8f4fb' : '#6ba2bd');
+    cx.fillStyle = h > 0.25 ? '#ffe08a' : (depth > 0.58 ? '#fff6d6' : '#6ba2bd');
     cx.fillRect(X, Y, r, r);
     if (h > 0) heat[i] = h - 0.022;
   }
@@ -926,11 +926,11 @@ function paintPanels(){
   }
 
   d = fitCanvas(sp);
-  pg.fillStyle = '#020704'; pg.fillRect(0,0,sp.width,sp.height);
+  pg.fillStyle = '#080601'; pg.fillRect(0,0,sp.width,sp.height);
   if (hist.length > 1){
     const mx = Math.max.apply(null, hist), mn = Math.min.apply(null, hist);
     const rng = Math.max(1, mx-mn);
-    pg.strokeStyle = '#3dff88'; pg.lineWidth = 1.2*d; pg.beginPath();
+    pg.strokeStyle = '#F0B90B'; pg.lineWidth = 1.2*d; pg.beginPath();
     hist.forEach(function(v,i){
       const x = (i/(hist.length-1))*sp.width;
       const y = sp.height - 3 - ((v-mn)/rng)*(sp.height-6);

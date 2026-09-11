@@ -1,4 +1,4 @@
-# flycoinrh — BNB Chain / flap.sh edition
+# FlapBrain — a fruit fly brain on BNB Chain / flap.sh
 
 A real fruit fly brain, simulated neuron by neuron, filling in the
 [flap.sh](https://flap.sh) token launchpad on BNB Chain.
