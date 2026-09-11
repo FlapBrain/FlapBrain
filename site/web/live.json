@@ -2,12 +2,12 @@
  "stream": "https://church-hood-sol-bare.trycloudflare.com",
  "at": 1789118682,
  "launch": {
-  "state": "not_launched",
+  "state": "launching",
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
   "url": "",
   "block": "",
-  "agent": "收到发射指令，预检通过，启动中…",
-  "agent_at": 1789124004,
+  "agent": "发射中：大脑已加载，开始录像并按 START",
+  "agent_at": 1789124020,
   "command": "",
   "command_at": 1789123997,
   "step": ""
