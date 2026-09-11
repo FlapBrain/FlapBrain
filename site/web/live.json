@@ -6,9 +6,9 @@
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
   "url": "",
   "block": "",
-  "agent": "拒绝：FLY_RH_LIVE=0，未武装。在 .env 里改成 1 再按。",
-  "agent_at": 1789121579,
-  "command": "rehearse",
+  "agent": "收到彩排指令，启动中…",
+  "agent_at": 1789121606,
+  "command": "",
   "command_at": 1789121599
  }
 }
