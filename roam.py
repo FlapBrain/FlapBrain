@@ -77,7 +77,7 @@ SEEDS = [
     # and the launchpad it will launch its own token on, plus its own site
     "https://flap.sh/?lang=en",
     "https://flap.sh/?lang=en",
-    "https://flybrain-bsc.vercel.app/",
+    "https://www.flapbrain.com/",
 ]
 
 # Hacker News and arXiv were seeds and had to go. Both are link dead ends
@@ -114,7 +114,7 @@ ALLOW = {
     "xkcd.com", "www.xkcd.com",
     "arxiv.org", "www.arxiv.org",
     "flap.sh", "www.flap.sh",
-    "flybrain-bsc.vercel.app",
+    "www.flapbrain.com", "flapbrain.com", "flybrain-bsc.vercel.app",
 }
 OPEN = load_env().get("FLY_ROAM_OPEN") == "1"
 

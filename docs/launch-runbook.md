@@ -102,7 +102,7 @@ as `ARMED`. The rig **must be restarted** after editing `.env`.
 py tools/launch_agent.py
 ```
 
-then open https://flybrain-bsc.vercel.app/admin, log in with the launch
+then open https://www.flapbrain.com/admin, log in with the launch
 wallet, and press **发射代币** (type `LAUNCH` to confirm). The agent checks
 `FLY_RH_LIVE=1`, `FLY_FLAP_COIN=launch` and the balance, refuses with the
 reason written back to the page if any fails, and otherwise starts
@@ -162,7 +162,7 @@ this wallet happened less than `FLY_FLAP_COOLDOWN_S` (3600 s) ago.
 1. In `.env` set `FLY_RH_LIVE=0` again. Restart nothing — the rig is done.
 2. `py bscwallet.py show` — the balance is lower by the gas (≈0.0001–0.002 BNB).
 3. Open `https://bscscan.com/tx/<hash>` from the log. Status **Success**.
-4. Site: open **https://flybrain-bsc.vercel.app/admin**, enter the admin
+4. Site: open **https://www.flapbrain.com/admin**, enter the admin
    token (the file `site/.admin-token` on this machine; it is the
    `ADMIN_TOKEN` env on the Vercel project), press 载入当前状态, then:
    - paste the contract into 合约地址 CA, the block into 发射区块,

@@ -102,7 +102,7 @@ the frame.
 
 **8. 已部署 — 前端 通过，漫游服务 需要你决定.** The front end is live on
 your Vercel account (project `flybrain`, team `poplamarks-projects`):
-**https://flybrain-bsc.vercel.app** (also
+**https://www.flapbrain.com** (also
 `flybrain-poplamarks-projects.vercel.app`). `/api/state` answers from BNB
 Chain (`launched: false`), `live.json` is served, and Vercel Authentication
 was switched off on the project so the page is public. Redeploy with
@@ -130,7 +130,7 @@ roam.py's own tunnel code is not used: on current cloudflared it mistakes
 repo. For a picture that survives this PC being off, `site/server/` and the
 Dockerfile are ready for Railway or any container host — **需要你决定**.
 
-**8a. /admin 后台 — 通过.** https://flybrain-bsc.vercel.app/admin, behind
+**8a. /admin 后台 — 通过.** https://www.flapbrain.com/admin, behind
 `ADMIN_TOKEN` (local copy in `site/.admin-token`, gitignored). Edits
 `site/web/live.json` in the repo through the GitHub API (CA, block, launch
 state, banner text and link, stream address) — `/api/state` and the page

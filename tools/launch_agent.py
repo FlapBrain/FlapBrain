@@ -33,7 +33,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 PY = sys.executable
-SITE = "https://flybrain-bsc.vercel.app"
+SITE = "https://www.flapbrain.com"
 TOKEN_FILE = ROOT / "site" / ".admin-token"
 LOG_DIR = ROOT / "build" / "agent"
 PORT = 4652
