@@ -40,9 +40,9 @@
 
   <section>
     <h2>登录</h2>
-    <div class="bar" style="margin-top:0">
+    <div class="bar" id="wallets" style="margin-top:0">
       <button id="wallet" class="go">连接 launch 钱包登录</button>
-      <span class="msg" style="margin-top:0">用导入了 launch 私钥的钱包（MetaMask 等）签一条消息，不花 gas、不发交易。</span>
+      <span class="msg" style="margin-top:0">用导入了 launch 私钥的钱包（OKX、MetaMask、Binance、Bitget…）签一条消息，不花 gas、不发交易。</span>
     </div>
     <label>或者输入口令 ADMIN_TOKEN</label>
     <input id="tok" type="password" placeholder="ADMIN_TOKEN" autocomplete="current-password">
@@ -134,13 +134,53 @@ $('load').onclick = async () => {
   try { await loadAll('口令登录'); } catch (e) { say('who', String(e.message || e), 'bad'); }
 };
 
+// Which wallets are installed. EIP-6963 announcements first (OKX, MetaMask,
+// Binance, Bitget, Rabby… all announce), then the legacy globals.
+const found = new Map();
+window.addEventListener('eip6963:announceProvider', ev => {
+  const d = ev.detail; if (d && d.info && d.provider) found.set(d.info.rdns || d.info.name, d);
+  renderWallets();
+});
+window.dispatchEvent(new Event('eip6963:requestProvider'));
+function legacyWallets() {
+  const out = [];
+  if (window.okxwallet) out.push({ info: { name: 'OKX Wallet', rdns: 'com.okex.wallet' }, provider: window.okxwallet });
+  if (window.BinanceChain) out.push({ info: { name: 'Binance Wallet', rdns: 'com.binance.wallet' }, provider: window.BinanceChain });
+  if (window.bitkeep && window.bitkeep.ethereum) out.push({ info: { name: 'Bitget Wallet', rdns: 'com.bitget.wallet' }, provider: window.bitkeep.ethereum });
+  if (window.ethereum) out.push({ info: { name: window.ethereum.isMetaMask ? 'MetaMask' : '浏览器钱包', rdns: 'window.ethereum' }, provider: window.ethereum });
+  return out;
+}
+function allWallets() {
+  const list = [...found.values()];
+  for (const w of legacyWallets()) if (!list.some(x => x.provider === w.provider)) list.push(w);
+  return list;
+}
+function renderWallets() {
+  const list = allWallets();
+  const host = $('wallets');
+  host.querySelectorAll('button.w').forEach(b => b.remove());
+  $('wallet').hidden = list.length > 0;
+  for (const w of list) {
+    const b = document.createElement('button'); b.className = 'go w';
+    b.textContent = '用 ' + w.info.name + ' 登录';
+    b.onclick = () => walletLogin(w.provider, w.info.name);
+    host.insertBefore(b, host.lastElementChild);
+  }
+}
+setTimeout(renderWallets, 300);
+setTimeout(renderWallets, 1500);
+
 // Sign-in with the launch wallet: eth_requestAccounts -> nonce from the API
 // -> personal_sign -> the API recovers the signer and mints a session token.
-$('wallet').onclick = async () => {
-  say('who', '…');
+$('wallet').onclick = () => {
+  const list = allWallets();
+  if (!list.length) return say('who', '浏览器里没有检测到钱包扩展（OKX / MetaMask 等）', 'bad');
+  walletLogin(list[0].provider, list[0].info.name);
+};
+async function walletLogin(eth, name) {
+  say('who', '等待 ' + name + ' …');
   try {
-    const eth = window.ethereum;
-    if (!eth) throw new Error('浏览器里没有钱包扩展（MetaMask 等）');
+    if (!eth) throw new Error('浏览器里没有钱包扩展');
     const [addr] = await eth.request({ method: 'eth_requestAccounts' });
     const n = await fetch('/api/admin', { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ action: 'nonce', address: addr }) }).then(r => r.json());
@@ -152,9 +192,9 @@ $('wallet').onclick = async () => {
       body: JSON.stringify({ action: 'login', address: addr, ts: n.ts, nonce: n.nonce, signature }) }).then(r => r.json());
     if (!l.ok) throw new Error(l.error);
     tokEl.value = l.token;
-    await loadAll('钱包 ' + addr.slice(0, 6) + '…' + addr.slice(-4) + ' 已登录（12 小时有效）');
+    await loadAll(name + ' ' + addr.slice(0, 6) + '…' + addr.slice(-4) + ' 已登录（12 小时有效）');
   } catch (e) { say('who', String(e.message || e), 'bad'); }
-};
+}
 
 $('save').onclick = async () => {
   $('save').disabled = true; say('save-msg', '写入仓库…');
