@@ -6,8 +6,8 @@
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
   "url": "",
   "block": "",
-  "agent": "失败：flaplive.py 没有启动（看 build/agent/flaplive.log）",
-  "agent_at": 1789123435,
+  "agent": "待命：本机代理在线，等指令。",
+  "agent_at": 1789123500,
   "command": "",
   "command_at": 1789123417,
   "step": "18"
