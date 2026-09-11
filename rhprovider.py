@@ -113,12 +113,17 @@ PROVIDER_JS = r"""
 
 
 async def attach(page, acct, rpc, chain_id, allow_send=False, on_send=None,
-                 log=None):
+                 log=None, is_metamask=True):
     """
     Install the EVM provider on `page`. Call before navigation.
 
     allow_send=False means eth_sendTransaction refuses rather than broadcasting,
     so the page cannot spend anything without an explicit opt-in.
+
+    is_metamask=False drops the isMetaMask flag. Some dapps (flap.sh, measured
+    2026-09-11) take a MetaMask-SDK path on seeing that flag next to an
+    EIP-6963 announcement and freeze a headless renderer within seconds; the
+    provider is still discovered and connected without it.
     """
     import requests
     from eth_account.messages import encode_defunct
@@ -169,9 +174,11 @@ async def attach(page, acct, rpc, chain_id, allow_send=False, on_send=None,
     await page.expose_function("__flyEthSignTyped", eth_sign_typed)
     await page.expose_function("__flyEthRpc", eth_rpc)
     await page.expose_function("__flyEthSend", eth_send)
-    await page.add_init_script(
-        PROVIDER_JS.replace("__ADDR__", acct.address)
-                   .replace("__CHAIN_HEX__", hex(chain_id)))
+    js = (PROVIDER_JS.replace("__ADDR__", acct.address)
+                     .replace("__CHAIN_HEX__", hex(chain_id)))
+    if not is_metamask:
+        js = js.replace("isMetaMask: true", "isMetaMask: false")
+    await page.add_init_script(js)
     return acct.address
 
 

@@ -17,3 +17,12 @@ __pycache__/
 
 # trained gains are small and reproducible, but they ARE a result - keep them
 !build/gains_ui.npz
+
+# BNB Chain / flap.sh port
+.venv/
+*.log
+launch/token.json          # the real token's parameters - never committed
+launch/token.png           # the real token's image
+launch/*.png
+launch/*.jpg
+tools/__pycache__/

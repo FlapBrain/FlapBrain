@@ -1,0 +1,11 @@
+{
+  "_comment": "Copy to launch/token.json (gitignored) and fill in. Read only when FLY_FLAP_COIN=launch is set in .env - rehearsals never touch it.",
+  "name": "flybrain",
+  "ticker": "FLYBRAIN",
+  "description": "A real fruit fly brain - 165,122 neurons, 10,228,000 synapses, measured by electron microscopy - filled in this form itself. Test token.",
+  "image": "launch/token.png",
+  "x": "your_x_handle_without_@",
+  "website": "https://flybrain.online",
+  "telegram": "",
+  "initial_buy_bnb": 0
+}

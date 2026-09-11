@@ -57,32 +57,37 @@ ROOT = Path(__file__).parent
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 flybrain-voice/1.0")
 
-# The launch, as it sits on chain. These never change, so they are constants
-# rather than something fetched.
-LAUNCH = {
-    "contract": "0x4eb990547bce4a982432ca88cf5fae7eed1a2d35",
-    "chain": "Robinhood Chain",
-    "chain_id": 4663,
-    "tx": "0x63b2164f3d784e46538cc81d3c48095bd7252a3d12398fdad9991870d12a4f1c",
-    "block": 59614342,
-    "launched_at": "2026-09-10T18:23:09Z",
-    "launched_unix": 1789064589,
-    "creator": "0x6ce4085EfB52a6eBDb7d6989beb8860847f4b42A",
-    "supply": 1000000000,
-    "creator_tax_pct": 1.0,
-    "paired_with": "GOOGL",
-    "launch_cost_eth": 0.000977,
-}
+# The launch, as it sits on chain. BNB Chain / flap.sh edition: the constants
+# live in launch/launch.json (no secrets in it), which flaplive.py fills in
+# when the token is actually created. Before that, "contract" is null and the
+# narrator knows the fly has not launched yet.
+def _load_launch():
+    p = ROOT / "launch" / "launch.json"
+    base = {
+        "contract": None, "chain": "BNB Chain", "chain_id": 56,
+        "tx": None, "block": None, "launched_at": None, "launched_unix": None,
+        "creator": None, "supply": 1000000000, "creator_tax_pct": 0.0,
+        "paired_with": "BNB", "launch_cost_bnb": None, "venue": "flap.sh",
+    }
+    try:
+        base.update(json.loads(p.read_text(encoding="utf-8")))
+    except Exception:
+        pass
+    return base
 
-TOKEN_PAGE = "https://www.ponsfamily.com/launchpad/" + LAUNCH["contract"]
-MARKET_API = "https://www.ponsfamily.com/api/pons-v2-market/" + LAUNCH["contract"]
+
+LAUNCH = _load_launch()
+LAUNCHED = bool(LAUNCH.get("contract"))
+
+TOKEN_PAGE = ("https://flap.sh/bnb/" + LAUNCH["contract"]) if LAUNCHED else "https://flap.sh"
+EXPLORER_TOKEN = ("https://bscscan.com/token/" + LAUNCH["contract"]) if LAUNCHED else "https://bscscan.com"
 
 # What it may have read to it. Real pages only; the model picks from this
 # list, and from the pages the fly itself walked across.
 ALLOWLIST = [
-    {"url": TOKEN_PAGE, "title": "its own token page on pons",
-     "why": "the coin it launched, with the live numbers"},
-    {"url": "https://www.ponsfamily.com/launchpad", "title": "the pons launchpad",
+    {"url": TOKEN_PAGE, "title": "its own token page on flap.sh" if LAUNCHED else "flap.sh, the launchpad",
+     "why": "the coin it launched, with the live numbers" if LAUNCHED else "where its coin will live"},
+    {"url": "https://flap.sh", "title": "the Flap launchpad",
      "why": "where its coin lives, and the other coins beside it"},
     {"url": "https://flybrain.online", "title": "flybrain.online",
      "why": "the page humans made about it"},
@@ -96,16 +101,17 @@ ALLOWLIST = [
      "why": "a thing that happens to coins like its own"},
     {"url": "https://en.wikipedia.org/wiki/Decentralized_finance", "title": "Decentralized finance - Wikipedia",
      "why": "where fees and sweeps come from"},
-    {"url": "https://en.wikipedia.org/wiki/Robinhood_Markets", "title": "Robinhood Markets - Wikipedia",
-     "why": "the company whose chain its coin is on"},
-    {"url": "https://en.wikipedia.org/wiki/Alphabet_Inc.", "title": "Alphabet Inc. - Wikipedia",
-     "why": "GOOGL is a token that stands for a piece of this"},
+    {"url": "https://en.wikipedia.org/wiki/BNB_Chain", "title": "BNB Chain - Wikipedia",
+     "why": "the chain its coin is on"},
+    {"url": "https://en.wikipedia.org/wiki/Binance", "title": "Binance - Wikipedia",
+     "why": "the company behind that chain"},
     {"url": "https://en.wikipedia.org/wiki/Drosophila_melanogaster", "title": "Drosophila melanogaster - Wikipedia",
      "why": "what it is"},
     {"url": "https://en.wikipedia.org/wiki/Connectome", "title": "Connectome - Wikipedia",
      "why": "what it is made of"},
-    {"url": "https://robinhoodchain.blockscout.com/token/" + LAUNCH["contract"],
-     "title": "its token on the chain explorer", "why": "the chain's own record of the coin"},
+    {"url": EXPLORER_TOKEN,
+     "title": "its token on the chain explorer" if LAUNCHED else "the chain explorer",
+     "why": "the chain's own record of the coin"},
 ]
 
 # Hosts the fly's own wanderings may be read from. Anything else it landed on
@@ -114,8 +120,9 @@ READABLE_HOSTS = {
     "en.wikipedia.org", "en.m.wikipedia.org", "commons.wikimedia.org",
     "en.wikisource.org", "en.wikiquote.org", "en.wikibooks.org",
     "www.gutenberg.org", "gutenberg.org", "openlibrary.org", "xkcd.com",
-    "www.xkcd.com", "arxiv.org", "www.ponsfamily.com", "ponsfamily.com",
-    "robinhoodchain.blockscout.com", "flybrain.online",
+    "www.xkcd.com", "arxiv.org", "flap.sh", "www.flap.sh", "bscscan.com",
+    "www.ponsfamily.com", "ponsfamily.com", "robinhoodchain.blockscout.com",
+    "flybrain.online",
 }
 
 # Trading language. Word-boundary, case-insensitive. A draft containing any of
@@ -157,7 +164,7 @@ def cfg():
         "stream": (_get("FLY_STREAM", "https://flybrain-production-2b26.up.railway.app")).rstrip("/"),
         "state_dir": state_dir,
         "journal": state_dir / "journal.json",
-        "rpc": _get("FLY_RH_RPC", "https://rpc.mainnet.chain.robinhood.com"),
+        "rpc": _get("FLY_BSC_RPC", "https://bsc-dataseed.binance.org"),
         "every_h": float(_get("FLY_VOICE_EVERY_H", "3")),
         "dry": _get("FLY_VOICE_DRY", "1") == "1",
         "prompt": Path(_get("FLY_VOICE_PROMPT", str(ROOT / "voice_prompt.md"))),
@@ -269,58 +276,58 @@ def _units(raw, decimals=18):
         return None
 
 
-def fetch_token():
-    """
-    The coin, from the pons market API and the page itself.
+def _call_str(rpc, to, selector):
+    """name() / symbol() of an ERC-20 over plain JSON-RPC."""
+    r = requests.post(rpc, json={"jsonrpc": "2.0", "id": 1, "method": "eth_call",
+                                 "params": [{"to": to, "data": selector}, "latest"]},
+                      timeout=20).json()
+    x = r.get("result") or ""
+    if len(x) < 130:
+        return ""
+    n = int(x[66:130], 16)
+    return bytes.fromhex(x[130:130 + n * 2]).decode("utf-8", "replace")
 
-    Fees come from /creator-fees (18-decimal integers in GOOGL), GOOGL's dollar
-    price from the chart payload, and market cap and price from the token
-    page's server-rendered text. Anything unreachable is None; the packet
-    still works.
+
+def fetch_token(rpc=None):
     """
-    t = {"fees_earned_googl": None, "fees_claimable_googl": None, "sweeps": None,
-         "googl_usd": None, "fees_usd": None, "claimable_usd": None,
-         "market_cap_usd": None, "price_usd": None, "price_googl": None,
-         "holders": None, "trades_1h": None, "quote": "GOOGL"}
+    The coin, read from BNB Chain and from its flap.sh page.
+
+    Supply, name and symbol come straight off the chain with eth_call. Market
+    cap, price and holders are scraped from the token page's rendered text
+    when it exposes them. Before the launch every field is None and the packet
+    still works - the narrator is told plainly that there is no coin yet.
+    """
+    t = {"launched": LAUNCHED, "name": None, "symbol": None, "supply": None,
+         "fees_earned": None, "fees_claimable": None, "sweeps": None,
+         "market_cap_usd": None, "price_usd": None, "price_quote": None,
+         "holders": None, "trades_1h": None, "quote": LAUNCH.get("paired_with", "BNB")}
+    if not LAUNCHED:
+        return t
+    addr = LAUNCH["contract"]
+    rpc = rpc or _get("FLY_BSC_RPC", "https://bsc-dataseed.binance.org")
     try:
-        f = _json(MARKET_API + "/creator-fees")
-        dec = int((f.get("quoteAsset") or {}).get("decimals", 18))
-        t["quote"] = (f.get("quoteAsset") or {}).get("symbol", "GOOGL")
-        t["fees_earned_googl"] = _units(f.get("earnedForToken"), dec)
-        t["fees_claimable_googl"] = _units(f.get("claimableForWallet"), dec)
-        t["sweeps"] = f.get("sweepCount")
+        t["name"] = _call_str(rpc, addr, "0x06fdde03")
+        t["symbol"] = _call_str(rpc, addr, "0x95d89b41")
+        r = requests.post(rpc, json={"jsonrpc": "2.0", "id": 1, "method": "eth_call",
+                                     "params": [{"to": addr, "data": "0x18160ddd"}, "latest"]},
+                          timeout=20).json()
+        t["supply"] = int(r.get("result", "0x0"), 16) / 1e18
     except Exception as exc:
-        say("creator-fees unavailable:", str(exc)[:80])
-    try:
-        c = _json(MARKET_API + "/chart?range=1h")
-        t["googl_usd"] = float(c.get("quoteUsd")) if c.get("quoteUsd") else None
-        pts = c.get("points") or []
-        if pts:
-            t["price_googl"] = float(pts[-1].get("price"))
-            t["trades_1h"] = int(sum(int(p.get("tradeCount") or 0) for p in pts))
-    except Exception as exc:
-        say("chart unavailable:", str(exc)[:80])
+        say("chain read unavailable:", str(exc)[:80])
     try:
         r = requests.get(TOKEN_PAGE, timeout=30, headers={"User-Agent": UA})
         txt = strip_html(r.text)
-        m = re.search(r"Market cap\s*\$([\d,]+(?:\.\d+)?)", txt)
+        m = re.search(r"Market ?cap\s*\$?([\d,]+(?:\.\d+)?)", txt, re.I)
         if m:
             t["market_cap_usd"] = float(m.group(1).replace(",", ""))
         m = re.search(r"Price\s*\$([\d.]+)", txt)
         if m:
             t["price_usd"] = float(m.group(1))
-        m = re.search(r"Holders\s*(\d+)", txt)
+        m = re.search(r"Holders\s*(\d+)", txt, re.I)
         if m and int(m.group(1)) > 0:
             t["holders"] = int(m.group(1))
     except Exception as exc:
         say("token page unavailable:", str(exc)[:80])
-    if t["googl_usd"] is None and t["price_usd"] and t["price_googl"]:
-        t["googl_usd"] = t["price_usd"] / t["price_googl"]
-    if t["googl_usd"]:
-        if t["fees_earned_googl"] is not None:
-            t["fees_usd"] = t["fees_earned_googl"] * t["googl_usd"]
-        if t["fees_claimable_googl"] is not None:
-            t["claimable_usd"] = t["fees_claimable_googl"] * t["googl_usd"]
     return t
 
 
@@ -353,11 +360,13 @@ def observe(c, now=None):
     }
     packet = {
         "now_utc": datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "elapsed_h": round((now - LAUNCH["launched_unix"]) / 3600.0, 1),
+        "launched": LAUNCHED,
+        "elapsed_h": (round((now - LAUNCH["launched_unix"]) / 3600.0, 1)
+                      if LAUNCH.get("launched_unix") else None),
         "telemetry": tele,
-        "token": fetch_token(),
+        "token": fetch_token(c["rpc"]),
         "launch": dict(LAUNCH),
-        "wallet_eth": wallet_eth(c["rpc"], LAUNCH["creator"]),
+        "wallet_bnb": wallet_eth(c["rpc"], LAUNCH["creator"]) if LAUNCH.get("creator") else None,
         "pages_read": [],
         "journal": {},
         "allowlist": [a["url"] for a in ALLOWLIST],
@@ -619,10 +628,15 @@ def stub_reflect(packet, readings, menu):
     t = packet["token"]
     day = (packet.get("journal") or {}).get("day", 1)
     parts = []
-    if t.get("fees_earned_googl") is not None and t.get("sweeps") is not None:
-        parts.append(f"The narrator read me my own page today. It says {fmt(t['fees_earned_googl'], 1)} "
-                     f"{t.get('quote', 'GOOGL')}, earned across {t['sweeps']} sweeps, in "
-                     f"{fmt(packet['elapsed_h'], 1)} hours. I do not know what a sweep is.")
+    if not packet.get("launched"):
+        parts.append(f"Day {day}. There is no coin yet. The narrator says I am rehearsing a form "
+                     f"on a page called flap.sh, and that nothing I click there is real until "
+                     f"a human turns a switch.")
+    elif t.get("supply") is not None:
+        parts.append(f"The narrator read me my own page today. My coin is called {t.get('symbol') or '?'} "
+                     f"and there are {fmt(t['supply'], 0)} of it"
+                     + (f", {fmt(packet['elapsed_h'], 1)} hours old" if packet.get("elapsed_h") is not None else "")
+                     + ".")
     else:
         parts.append(f"Day {day}. The narrator could not reach my page today, so it told me only "
                      f"what my eye saw.")
@@ -636,6 +650,8 @@ def stub_reflect(packet, readings, menu):
         parts.pop()
         post = " ".join(parts)
     learned = []
+    if not packet.get("launched"):
+        learned.append("a launch needs a human to turn a switch first")
     if t.get("sweeps") is not None:
         learned.append("a sweep seems to be when the fees are gathered up")
     if readings:
