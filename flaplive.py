@@ -747,8 +747,74 @@ async def complete_form(page, coin, filled, send, shot):
             after[k] = "<missing>" if k in OPTIONAL else "<unreadable>"
     await send({"type": "log", "msg": f"FINAL field values: {after}"})
     await send({"type": "fields", "by_fly": by_fly, "by_rig": by_rig})
+    if TOKEN_KIND == "tax":
+        await fill_tax_fields(page, send, shot)
     await shot("form complete")
     return after
+
+
+# flap.sh's tax page ("Create Tax Token", /launch?chain=bnb): the two rate
+# inputs carry no id and show "1%"; they are the first input after each
+# label. The creator wallet is textarea#recipient.
+TAX_INPUT_JS = """(label) => {
+  const l = [...document.querySelectorAll('label')].find(x => (x.textContent||'').trim().startsWith(label));
+  if (!l) return null;
+  let box = l.parentElement, c = null;
+  for (let i = 0; i < 3 && box && !c; i++) { c = box.querySelector('input'); box = box.parentElement; }
+  if (!c) return null;
+  const r = c.getBoundingClientRect();
+  return {x: r.x, y: r.y, w: r.width, h: r.height, value: c.value}; }"""
+
+
+async def fill_tax_fields(page, send, shot):
+    """
+    Put the tax terms on the page the fly is looking at, so the stage says
+    what the transaction says: buy/sell rate, and the creator wallet. The
+    on-chain call (direct mode) is built from .env, not from these boxes.
+    """
+    env = load_env()
+    buy = int(env.get("FLY_FLAP_BUY_BPS", "100")) / 100
+    sell = int(env.get("FLY_FLAP_SELL_BPS", "100")) / 100
+    wallet = account(env).address
+    try:
+        for label, pct in (("Buy Tax Rate", buy), ("Sell Tax Rate", sell)):
+            box = None
+            for _ in range(2):
+                # bring the box into the inner scroller's view, then measure
+                await page.evaluate(
+                    """(label) => { const l=[...document.querySelectorAll('label')]
+                         .find(x=>(x.textContent||'').trim().startsWith(label));
+                       l && l.scrollIntoView({block:'center'}); }""", label)
+                await page.wait_for_timeout(500)
+                box = await page.evaluate(TAX_INPUT_JS, label)
+                if not box:
+                    break
+                await glide(page, box["x"] + box["w"] / 2, box["y"] + box["h"] / 2, send, hold=0.3)
+                await page.mouse.click(box["x"] + box["w"] / 2, box["y"] + box["h"] / 2)
+                await page.keyboard.press("End")
+                for _k in range(4):
+                    await page.keyboard.press("Backspace")
+                await page.keyboard.type(f"{pct:g}", delay=90)
+                await page.keyboard.press("Tab")
+                await page.wait_for_timeout(500)
+                box = await page.evaluate(TAX_INPUT_JS, label)
+                if box and box["value"].replace("%", "").strip() == f"{pct:g}":
+                    break
+            await send({"type": "log",
+                        "msg": f"{label.lower()} on the page: {box['value'] if box else 'field not found'}"})
+        # the site pre-fills the connected wallet here; only touch it if it differs
+        cur = await page.evaluate("() => (document.querySelector('#recipient')||{}).value || null")
+        if cur is None:
+            await send({"type": "log", "msg": "creator wallet field (#recipient) not on this page"})
+        elif cur.strip().lower() != wallet.lower():
+            await page.fill("#recipient", wallet, timeout=4000)
+            cur = await page.input_value("#recipient", timeout=3000)
+            await send({"type": "log", "msg": f"creator funds wallet on the page: {cur}"})
+        else:
+            await send({"type": "log", "msg": f"creator funds wallet on the page: {cur} (pre-filled by the site)"})
+        await shot("tax terms typed")
+    except Exception as e:
+        await send({"type": "log", "msg": f"tax fields: {str(e)[:120]}"})
 
 
 async def finish(ws, page, coin, filled, live, send, shot, sent, acct, rpc):
