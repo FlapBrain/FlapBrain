@@ -98,6 +98,16 @@ function merge(cur, patch) {
   if ('banner' in L) out.launch.banner = String(L.banner || '').slice(0, 160);
   if ('url' in L) out.launch.url = String(L.url || '').trim().slice(0, 300);
   if ('token_page' in L) out.launch.token_page = String(L.token_page || '').trim().slice(0, 300);
+  if ('tx' in L) {
+    const t = String(L.tx || '').trim();
+    if (t && !/^0x[0-9a-fA-F]{64}$/.test(t)) throw new Error('tx must be a 0x… transaction hash (64 hex)');
+    out.launch.tx = t;
+  }
+  if ('step' in L) {
+    const st = String(L.step || '').trim();
+    if (st && !/^\d{1,2}$/.test(st)) throw new Error('step must be a number');
+    out.launch.step = st;
+  }
   return out;
 }
 

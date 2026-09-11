@@ -1,0 +1,17 @@
+{
+ "runs": 8,
+ "fields": 3,
+ "filled_by_fly_total": 0,
+ "filled_by_rig_total": 24,
+ "filled_by_fly_per_run": 0.0,
+ "runs_reaching_create": 5,
+ "neurons": 165122,
+ "synapses": 10228000,
+ "eye_columns": 892,
+ "wingbeats_hz": 200,
+ "address_suffix": "8888",
+ "chain_id": 56,
+ "gas_units": 2096412,
+ "creation_fee_bnb": 0,
+ "updated": "2026-09-11T10:00:13Z"
+}

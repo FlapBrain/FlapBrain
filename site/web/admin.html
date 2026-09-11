@@ -70,8 +70,12 @@
         </select></div>
       <div><label>横幅链接（直播 / 代币页）</label><input id="url" placeholder="https://…"></div>
     </div>
-    <label>横幅文字</label>
-    <input id="banner" placeholder="THE FLY IS LAUNCHING ITS TOKEN — watch it live">
+    <label>横幅文字（留空 = 用页面自带的中英文默认文案）</label>
+    <input id="banner" placeholder="留空即可">
+    <div class="row">
+      <div><label>发射交易哈希 tx（launched 状态显示在横幅里）</label><input id="tx" placeholder="0x…（64 位十六进制）" spellcheck="false"></div>
+      <div><label>当前步数 step（launching 状态显示"第 N/18 步"，可留空）</label><input id="step" placeholder="例如 7"></div>
+    </div>
 
     <h2 style="margin-top:22px">漫游流</h2>
     <label>stream 地址（publish_live.py 会自动写；手动改也行，留空 = 离线）</label>
@@ -117,6 +121,8 @@ function fill(live) {
   $('state').value = L.state || 'not_launched';
   $('url').value = L.url || '';
   $('banner').value = L.banner || '';
+  $('tx').value = L.tx || '';
+  $('step').value = L.step || '';
   $('stream').value = live.stream || '';
   const p = $('state-pill'); p.textContent = L.state || 'not_launched'; p.className = 'pill ' + (L.state || '');
 }
@@ -204,7 +210,8 @@ $('save').onclick = async () => {
     const patch = { stream: $('stream').value.trim() || null,
       launch: { contract: $('contract').value.trim(), block: $('block').value.trim(),
                 token_page: $('token_page').value.trim(), state: $('state').value,
-                url: $('url').value.trim(), banner: $('banner').value.trim() } };
+                url: $('url').value.trim(), banner: $('banner').value.trim(),
+                tx: $('tx').value.trim(), step: $('step').value.trim() } };
     if (patch.launch.contract && !patch.launch.token_page)
       patch.launch.token_page = 'https://flap.sh/bnb/' + patch.launch.contract.toLowerCase();
     const j = await api('save', { patch, note: 'from /admin' });
