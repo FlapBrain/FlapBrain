@@ -1,8 +1,8 @@
 {
  "stream": "https://church-hood-sol-bare.trycloudflare.com",
- "at": 1789118682,
+ "at": 1789126822,
  "launch": {
-  "state": "launching",
+  "state": "launched",
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
   "url": "",
   "block": "",
@@ -10,6 +10,9 @@
   "agent_at": 1789124836,
   "command": "",
   "command_at": 1789124228,
-  "step": ""
+  "step": "",
+  "contract": "0xfc00cb1b872e0171e38aeeab61c7065ba9c67777",
+  "token_page": "https://flap.sh/bnb/0xfc00cb1b872e0171e38aeeab61c7065ba9c67777",
+  "tx": ""
  }
 }
