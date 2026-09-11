@@ -7,6 +7,8 @@
   "url": "",
   "block": "",
   "agent": "待命：本机代理在线，等指令。",
-  "agent_at": 1789121568
+  "agent_at": 1789121568,
+  "command": "launch",
+  "command_at": 1789121576
  }
 }
