@@ -436,7 +436,7 @@ html[data-lang="en"] .zh{display:none!important}
       <div class="stat"><div class="n">10,228,000</div><div class="l"><span class="zh">带符号突触</span><span class="en">signed synapses</span></div></div>
       <div class="stat"><div class="n">892</div><div class="l"><span class="zh">复眼视柱</span><span class="en">eye columns</span></div></div>
       <div class="stat"><div class="n">200</div><div class="l"><span class="zh">每秒翅膀次数</span><span class="en">wingbeats per second</span></div></div>
-      <div class="stat"><div class="n">8888</div><div class="l"><span class="zh">地址尾号</span><span class="en">address ends in</span></div></div>
+      <div class="stat"><div class="n">7777</div><div class="l"><span class="zh">地址尾号</span><span class="en">address ends in</span></div></div>
       <div class="stat"><div class="n">56</div><div class="l"><span class="zh">链 ID</span><span class="en">chain id</span></div></div>
     </div>
   </div>
@@ -600,20 +600,20 @@ html[data-lang="en"] .zh{display:none!important}
   <div class="wrap">
     <div class="eyebrow"><span class="zh">一条链，一笔签名</span><span class="en">one chain, one signature</span></div>
     <h2 id="t-h2">$FLAPBRAIN</h2>
-    <p class="lede" id="t-lede"><span class="zh">还没发射。地址已经算好了，尾号 8888。发射时这一行会变。</span><span class="en">Not launched yet. The address is already known — it ends in 8888. This line changes when it happens.</span></p>
+    <p class="lede" id="t-lede"><span class="zh">还没发射。地址会在交易发出前算好，尾号 7777。发射时这一行会变。</span><span class="en">Not launched yet. The address is computed before the transaction is sent — it ends in 7777. This line changes when it happens.</span></p>
     <div class="scroll"><table>
       <tr><th><span class="zh">合约</span><span class="en">Contract</span></th><td class="addr" id="t-ca"><span class="zh">还没发射</span><span class="en">not launched yet</span></td></tr>
       <tr><th><span class="zh">计价</span><span class="en">Quote</span></th><td class="num" id="t-pair">BNB</td></tr>
-      <tr><th><span class="zh">税</span><span class="en">Tax</span></th><td class="num" id="t-tax">0 % <span class="zh">（非税币）</span><span class="en">(non-tax token)</span></td></tr>
+      <tr><th><span class="zh">税</span><span class="en">Tax</span></th><td class="num" id="t-tax">3 % <span class="zh">买 / 3 % 卖，归创作者钱包</span><span class="en">buy / 3 % sell, to the creator wallet</span></td></tr>
       <tr><th><span class="zh">供应量</span><span class="en">Supply</span></th><td class="num" id="t-sup">1,000,000,000 <span class="zh">发射时固定</span><span class="en">at launch</span></td></tr>
       <tr><th><span class="zh">链</span><span class="en">Chain</span></th><td class="num">BNB Chain · id 56</td></tr>
     </table></div>
     <p style="margin-top:22px"><a id="t-link" href="https://flap.sh"><span class="zh">在 flap.sh 打开</span><span class="en">open on flap.sh</span></a></p>
 
-    <p class="zh" style="margin-top:34px">BNB Chain，链 ID 56。flap.sh，非税币。地址由 CREATE2 在交易发出前算好，尾号 8888。创建费为零——用 eth_call 在 value 0 上验证过。Gas 约 210 万单位，按 BNB 链 0.05 gwei 的地板价约 0.0001 BNB。LP 手续费作为分红发给持有人。</p>
-    <p class="zh">网站只向注入钱包索要一笔交易——Portal.newTokenV7——在 Python 里签名并广播。私钥从不进页面。</p>
-    <p class="en" style="margin-top:34px">BNB Chain, id 56. flap.sh, non-tax token. Address computed by CREATE2 before the transaction is sent, ending in 8888. Creation fee: none — confirmed by eth_call at value 0. Gas about 2.1M units, ≈0.0001 BNB at BNB Chain's 0.05 gwei floor. LP fees are paid to holders as dividends.</p>
-    <p class="en">The site asks the injected wallet for exactly one transaction — Portal.newTokenV7 — signed in Python and broadcast. The private key never enters the page.</p>
+    <p class="zh" style="margin-top:34px">BNB Chain，链 ID 56。flap.sh，税币：买 3%、卖 3%，税归创作者钱包（Flap 协议抽成后）。地址由 CREATE2 在交易发出前算好，尾号 7777。创建费为零——用 eth_call 在 value 0 上验证过。Gas 约 210 万单位，按 BNB 链 0.05 gwei 的地板价约 0.0001 BNB。</p>
+    <p class="zh">整个发射只有一笔交易——Portal.newTokenV6——在 Python 里签名并广播。私钥从不进页面。</p>
+    <p class="en" style="margin-top:34px">BNB Chain, id 56. flap.sh, tax token: 3 % on buys, 3 % on sells, paid to the creator wallet after Flap's protocol share. Address computed by CREATE2 before the transaction is sent, ending in 7777. Creation fee: none — confirmed by eth_call at value 0. Gas about 2.1M units, ≈0.0001 BNB at BNB Chain's 0.05 gwei floor.</p>
+    <p class="en">The whole launch is exactly one transaction — Portal.newTokenV6 — signed in Python and broadcast. The private key never enters the page.</p>
     <p class="zh">两个开关，都在 .env 里，默认都关：</p>
     <p class="en">Two switches, both in .env, both off by default:</p>
     <div class="switch"><b>FLY_ALLOW_BROWSER=1</b> <span class="zh">才会对真实网站开浏览器。</span><span class="en">before a browser opens against a real site at all.</span></div>
@@ -675,8 +675,8 @@ html[data-lang="en"] .zh{display:none!important}
       <p class="zh">因为果蝇便宜又快。一次发射约 0.0001 BNB。</p>
       <p class="en">Because a fly is cheap and fast. One launch is about 0.0001 BNB.</p></details>
     <details><summary><span class="zh">有税吗？</span><span class="en">Is there a tax?</span></summary>
-      <p class="zh">非税币。LP 手续费直接分给持有人。</p>
-      <p class="en">No. Non-tax token. LP fees go straight to holders.</p></details>
+      <p class="zh">有。买 3%、卖 3%，税归创作者钱包 0xa972…b672。这也是链上写死的，谁都能查。</p>
+      <p class="en">Yes. 3 % on buys and 3 % on sells, paid to the creator wallet 0xa972…b672. It is written into the contract; anyone can check.</p></details>
     <details><summary><span class="zh">我能自己跑吗？</span><span class="en">Can I run it?</span></summary>
       <p class="zh">能。仓库公开，连接组 CC-BY 可下载（1.1 GB，不需要账号），README 里有每一条命令。也可以不开大脑、不开浏览器，用 demo.py 回放一次录制好的干跑。</p>
       <p class="en">Yes. The repo is public, the connectome is CC-BY and downloadable (1.1 GB, no account), and every command is in the README. You can also skip the brain and the browser entirely and replay a recorded dry run with demo.py.</p></details>
@@ -953,7 +953,7 @@ async function tick(){
       try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
       ta.remove();
     }
-    lab.textContent = ok ? (LANG.cur === 'zh' ? '尾号 8888，已复制' : 'Ends in 8888. Copied.') : 'Press Ctrl+C';
+    lab.textContent = ok ? (LANG.cur === 'zh' ? '尾号 7777，已复制' : 'Ends in 7777. Copied.') : 'Press Ctrl+C';
     live.textContent = ok ? 'Contract address copied' : 'Copy failed, select it manually';
     btn.classList.toggle('done', ok);
     clearTimeout(timer);

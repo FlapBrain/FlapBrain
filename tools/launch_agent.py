@@ -87,8 +87,12 @@ def preflight(cmd):
         if env.get("FLY_FLAP_COIN") != "launch":
             return "拒绝：.env 里没有 FLY_FLAP_COIN=launch，会用测试参数。"
         bnb, addr = balance_bnb(env)
-        if bnb < 0.002:
-            return f"拒绝：钱包 {addr[:6]}…{addr[-4:]} 只有 {bnb:.5f} BNB，先转 0.01 BNB。"
+        if 0 < bnb < 0.002:
+            return f"拒绝：钱包 {addr[:6]}…{addr[-4:]} 只有 {bnb:.5f} BNB，不够 gas，先转 0.01 BNB。"
+        if bnb == 0:
+            # nothing can be spent from an empty wallet: let the path run all
+            # the way to the node, which will refuse the broadcast
+            report(agent=f"警告：钱包 {addr[:6]}…{addr[-4:]} 是 0 BNB。会签名并尝试广播，节点会以 insufficient funds 拒绝——只能验证路径，不会创建代币。")
     else:
         if live:
             return "拒绝：彩排要求 FLY_RH_LIVE=0，现在是 1。"
@@ -107,15 +111,39 @@ def rig_status():
         return None
 
 
+def kill_rig():
+    subprocess.run(["powershell", "-NoProfile", "-Command",
+                    "Get-CimInstance Win32_Process | Where-Object { $_.Name -like 'python*' -and "
+                    "$_.CommandLine -like '*flaplive.py*' } | ForEach-Object { Stop-Process -Id "
+                    "$_.ProcessId -Force -ErrorAction SilentlyContinue }"], capture_output=True)
+
+
 def ensure_rig():
     """
     flaplive.py on :4652 - started here if nobody has, and left running
     afterwards so it can be watched (and driven) at http://localhost:4652.
-    The agent never kills a rig; a person does that, if they want.
+    A rig started before .env changed (mode, tax, coin, the LIVE switch) is
+    stale - it read .env once at import - so it is replaced, but only when
+    it is idle.
     """
-    if rig_status():
-        say("rig already up on :4652, reusing it")
-        return True
+    st = rig_status()
+    if st:
+        env = load_env()
+        want = {"live": env.get("FLY_RH_LIVE", "0") == "1",
+                "mode": env.get("FLY_FLAP_MODE", "site"),
+                "token_kind": env.get("FLY_FLAP_TOKEN", "std"),
+                "coin": "launch" if env.get("FLY_FLAP_COIN") == "launch" else "test"}
+        stale = any(st.get(k) != v for k, v in want.items())
+        if not stale:
+            say("rig already up on :4652, reusing it")
+            return True
+        for _ in range(100):
+            if not (rig_status() or {}).get("running"):
+                break
+            time.sleep(6)
+        say("rig is stale (.env changed) - restarting it")
+        kill_rig()
+        time.sleep(3)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     say(f"starting flaplive.py -> {RIG_LOG.name}")
     fh = open(RIG_LOG, "a", encoding="utf-8")

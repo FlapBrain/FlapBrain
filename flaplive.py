@@ -109,7 +109,10 @@ async def status():
                 "venue": f"flap.sh ({MODE})",
                 "chain": f"BNB Chain {CHAIN_ID}",
                 "live": live_flag(env), "armed": browser_allowed(),
-                "running": bool(STATE.get("running"))}
+                "running": bool(STATE.get("running")),
+                # what this process was started with (read once, at import)
+                "mode": MODE, "token_kind": TOKEN_KIND,
+                "coin": "launch" if _E.get("FLY_FLAP_COIN") == "launch" else "test"}
     except SystemExit:
         return {"wallet": None, "sol": 0, "unit": "BNB", "live": False,
                 "armed": browser_allowed()}
@@ -938,6 +941,10 @@ async def finish_direct(page, fields, live, send, shot, acct, rpc, coin):
                       mktBps=10000)
         data = encode_new_token_v6(params)
         method = "newTokenV6 (TOKEN_TAXED_V3)"
+        await send({"type": "log",
+                    "msg": f"tax token: buy {params['buyTaxRate']/100:.2f}% / sell "
+                           f"{params['sellTaxRate']/100:.2f}%, all tax (mktBps 10000) to "
+                           f"beneficiary {params['beneficiary']}"})
     else:
         salt, addr, n, secs = await loop_.run_in_executor(
             None, lambda: find_salt(SUFFIX_STANDARD, flapportal.TOKEN_IMPL_V3))
