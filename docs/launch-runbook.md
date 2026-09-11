@@ -137,12 +137,21 @@ this wallet happened less than `FLY_FLAP_COOLDOWN_S` (3600 s) ago.
 1. In `.env` set `FLY_RH_LIVE=0` again. Restart nothing — the rig is done.
 2. `py bscwallet.py show` — the balance is lower by the gas (≈0.0001–0.002 BNB).
 3. Open `https://bscscan.com/tx/<hash>` from the log. Status **Success**.
-4. Site: in `site/web/live.json` set `launch.state` to `"launched"` and
-   `launch.url` to the flap.sh token page; commit and push (`git add
-   site/web/live.json launch/launch.json && git commit -m "launch" && git push`).
-   Set `FLY_TOKEN=<contract>` and `FLY_TOKEN_BLOCK=<block>` on the Vercel
-   project (and on the Railway service if you run one) so the token table
-   fills in.
+4. Site (https://flybrain-bsc.vercel.app, Vercel project `flybrain`): in
+   `site/web/live.json` set `launch.state` to `"launched"` and `launch.url`
+   to the flap.sh token page; commit and push (`git add site/web/live.json
+   launch/launch.json && git commit -m "launch" && git push`). Then set the
+   token on the Vercel project and redeploy so the token table fills in:
+
+   ```bash
+   vercel env add FLY_TOKEN production          # paste the contract address
+   vercel env add FLY_TOKEN_BLOCK production    # the launch block, hex or decimal
+   vercel --cwd site --prod
+   ```
+
+   (Run those from the `site/` directory, which is linked to the project.)
+   Before the launch, the same two commands with `launch.state:
+   "launching"` and `launch.url` set to your stream turn the banner on.
 5. `py voice.py --once --dry` — the narrator now reads the coin from chain.
 
 ## 6. If it goes wrong

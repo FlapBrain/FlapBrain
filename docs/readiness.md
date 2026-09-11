@@ -100,16 +100,22 @@ the frame.
 
 ## 三、公开直播站
 
-**8. 已部署 — 需要你决定.** `flybrain.online` and the Railway roamer
-(`flybrain-production-2b26.up.railway.app`) are **the upstream author's**
-deployments; they answer and the fly moves there, but they show the
-Robinhood/pons token and are not yours to change. Your fork has no Vercel
-project and no Railway service. The Vercel CLI on this machine is logged in
-as `poplamark00-4633`, so `vercel --cwd site` can deploy the static site plus
-`api/state.js` under your account when you say so; the roaming service needs
-a Railway (or any) account of yours — `site/server/` and the Dockerfile are
-ready for it. Until then `index.html` points `STABLE_STREAM` at nothing and
-reads `live.json` from your fork for the stream address.
+**8. 已部署 — 前端 通过，漫游服务 需要你决定.** The front end is live on
+your Vercel account (project `flybrain`, team `poplamarks-projects`):
+**https://flybrain-bsc.vercel.app** (also
+`flybrain-poplamarks-projects.vercel.app`). `/api/state` answers from BNB
+Chain (`launched: false`), `live.json` is served, and Vercel Authentication
+was switched off on the project so the page is public. Redeploy with
+`vercel --cwd site --prod` from this machine; `site/.vercel/` holds the link
+and is gitignored.
+
+`flybrain.online` and `flybrain.vercel.app` are **the upstream author's**
+deployments and show the Robinhood token — not ours to change. The roaming
+service (the moving picture on the page) still needs a host of yours:
+`site/server/` and the Dockerfile are ready for Railway or any container
+host; until it exists the page shows "THE FLY IS BETWEEN RUNS" in that panel.
+`index.html` reads `live.json` from your fork for a stream address, so a
+laptop-run roamer with a tunnel would also work.
 
 **9. 未发射状态 — 通过（本地）.** With `FLY_TOKEN` unset the state service
 answers `launched: false, token: null` and the page shows "not launched yet"
