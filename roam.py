@@ -74,10 +74,10 @@ SEEDS = [
     "https://www.gutenberg.org/browse/scores/top",
     "https://openlibrary.org/",
     "https://xkcd.com/",
-    # and the chain it launched its own token on
-    "https://www.ponsfamily.com/launchpad/explore",
-    "https://www.ponsfamily.com/launchpad/0x4eb990547bce4a982432ca88cf5fae7eed1a2d35",
-    "https://robinhoodchain.blockscout.com/txs",
+    # and the launchpad it will launch its own token on, plus its own site
+    "https://flap.sh/?lang=en",
+    "https://flap.sh/?lang=en",
+    "https://flybrain-bsc.vercel.app/",
 ]
 
 # Hacker News and arXiv were seeds and had to go. Both are link dead ends
@@ -113,8 +113,8 @@ ALLOW = {
     "openlibrary.org",
     "xkcd.com", "www.xkcd.com",
     "arxiv.org", "www.arxiv.org",
-    "www.ponsfamily.com", "ponsfamily.com",
-    "robinhoodchain.blockscout.com",
+    "flap.sh", "www.flap.sh",
+    "flybrain-bsc.vercel.app",
 }
 OPEN = load_env().get("FLY_ROAM_OPEN") == "1"
 
