@@ -935,8 +935,8 @@ async def finish_direct(page, fields, live, send, shot, acct, rpc, coin):
             None, lambda: find_salt(SUFFIX_TAX, flapportal.TOKEN_IMPL_TAXED_V3))
         params = standard_token_params(name, symbol, cid, salt, acct.address)
         params.update(tokenVersion=TOKEN_VERSION["TOKEN_TAXED_V3"],
-                      buyTaxRate=int(os.environ.get("FLY_FLAP_BUY_BPS", "100")),
-                      sellTaxRate=int(os.environ.get("FLY_FLAP_SELL_BPS", "100")),
+                      buyTaxRate=int(_E.get("FLY_FLAP_BUY_BPS", "100")),
+                      sellTaxRate=int(_E.get("FLY_FLAP_SELL_BPS", "100")),
                       taxDuration=365 * 86400, antiFarmerDuration=3600,
                       mktBps=10000)
         data = encode_new_token_v6(params)

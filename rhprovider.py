@@ -228,11 +228,14 @@ def send_transaction(acct, tx, rpc, chain_id, say=None, wait_receipt=True):
             "value": hex(body["value"]), "data": body["data"]}])
         body["gas"] = int(as_int(est) * 1.25)
 
-    # Nitro chains price in EIP-1559 terms
+    # EIP-1559 fields. Nitro chains (Robinhood) ignore the tip, so it is
+    # capped at 0.001 gwei there; BNB Chain enforces a minimum tip equal to
+    # its gas-price floor (0.05 gwei - "gas tip cap below minimum" otherwise),
+    # so there the node's suggested price is used as the tip.
     try:
         base = as_int(rpc_call("eth_gasPrice", []))
         body["maxFeePerGas"] = int(base * 2)
-        body["maxPriorityFeePerGas"] = min(int(base), 1_000_000)
+        body["maxPriorityFeePerGas"] = int(base) if chain_id == 56 else min(int(base), 1_000_000)
         body["type"] = 2
     except Exception:
         body["gasPrice"] = as_int(rpc_call("eth_gasPrice", []))
