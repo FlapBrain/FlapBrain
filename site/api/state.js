@@ -1,19 +1,19 @@
-// Same-origin proxy to the Robinhood Chain node.
+// Same-origin proxy to a BNB Chain node.
 //
-// The public node's CORS is unreliable: it intermittently answers
-// "Access-Control-Allow-Origin: *,*" - a duplicated header that every browser
-// rejects - so reading the chain straight from the page showed "offline" at
-// random. This runs server-side, where CORS does not apply, and the page then
-// talks only to its own origin.
+// The page talks only to its own origin; this runs server-side where CORS
+// does not apply, and reads. There is no key here and no method in the
+// allowlist that writes.
 //
-// It reads. There is no key here and no method in the allowlist that writes.
+// Before the launch FLY_TOKEN is unset: the answer then carries
+// `launched: false` and `token: null`, and the page shows placeholders.
 
-const RPC = process.env.FLY_RH_RPC || 'https://rpc.mainnet.chain.robinhood.com';
-const TOKEN = (process.env.FLY_TOKEN || '0x4eb990547bce4a982432ca88cf5fae7eed1a2d35').toLowerCase();
-const WALLET = process.env.FLY_WALLET || '0x6ce4085EfB52a6eBDb7d6989beb8860847f4b42A';
-const BIRTH = process.env.FLY_TOKEN_BLOCK || '0x38DA606';
+const RPC = process.env.FLY_BSC_RPC || 'https://bsc-dataseed.binance.org';
+const TOKEN = (process.env.FLY_TOKEN || '').trim().toLowerCase();
+const WALLET = process.env.FLY_WALLET || '';
+const BIRTH = process.env.FLY_TOKEN_BLOCK || '0x0';
 const TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-const FEE_ETH = 0.00055;
+// gas only: Flap charges no fixed creation fee on BNB Chain (docs/flap.md)
+const LAUNCH_COST_BNB = Number(process.env.FLY_LAUNCH_COST_BNB || '0.001');
 
 let holdersCache = { at: 0, holders: null, transfers: null };
 const HOLD_TTL = 120000;
@@ -57,30 +57,42 @@ async function holders() {
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=60');
   try {
-    const [blk, sup, sym, bal] = await Promise.all([
-      rpc('eth_blockNumber', []),
-      rpc('eth_call', [{ to: TOKEN, data: '0x18160ddd' }, 'latest']),
-      rpc('eth_call', [{ to: TOKEN, data: '0x95d89b41' }, 'latest']),
-      rpc('eth_getBalance', [WALLET, 'latest']),
-    ]);
-    const h = await holders();
-    const eth = int(bal) / 1e18;
-    res.status(200).json({
+    const blk = await rpc('eth_blockNumber', []);
+    const out = {
       ok: true,
+      chain: { name: 'BNB Chain', id: 56 },
       block: int(blk),
-      budget_eth: eth,
-      launches_left: Math.floor(eth / FEE_ETH),
-      token: {
+      launched: !!TOKEN,
+      wallet: null,
+      token: null,
+      updated: Math.floor(Date.now() / 1000),
+    };
+    if (WALLET) {
+      const bal = await rpc('eth_getBalance', [WALLET, 'latest']);
+      const bnb = int(bal) / 1e18;
+      out.wallet = { address: WALLET, bnb, launches_left: Math.floor(bnb / LAUNCH_COST_BNB) };
+    }
+    if (TOKEN) {
+      const [sup, sym, nm] = await Promise.all([
+        rpc('eth_call', [{ to: TOKEN, data: '0x18160ddd' }, 'latest']),
+        rpc('eth_call', [{ to: TOKEN, data: '0x95d89b41' }, 'latest']),
+        rpc('eth_call', [{ to: TOKEN, data: '0x06fdde03' }, 'latest']),
+      ]);
+      const h = await holders();
+      out.token = {
         address: TOKEN,
+        name: abiString(nm),
         symbol: abiString(sym),
         supply: Number(BigInt(sup)) / 1e18,
         holders: h.holders,
         transfers: h.transfers,
-        pair: 'GOOGL',
-        creator_tax_pct: 1,
-      },
-      updated: Math.floor(Date.now() / 1000),
-    });
+        pair: 'BNB',
+        creator_tax_pct: 0,
+        url: 'https://flap.sh/bnb/' + TOKEN,
+        explorer: 'https://bscscan.com/token/' + TOKEN,
+      };
+    }
+    res.status(200).json(out);
   } catch (e) {
     res.status(200).json({ ok: false, error: String(e.message || e).slice(0, 160) });
   }

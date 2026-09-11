@@ -1,13 +1,19 @@
 """
-Live state for the flybrain site.
+Live state for the flybrain site - BNB Chain edition.
 
-Everything here is read straight off Robinhood Chain over JSON-RPC. Blockscout
-sits behind Cloudflare and answers a challenge page to servers, so there is no
-indexer in the path - only eth_call, eth_getBalance and eth_getLogs, which any
-reader can repeat against the same public node.
+Everything here is read straight off BNB Chain over JSON-RPC: eth_call,
+eth_getBalance and eth_getLogs, which any reader can repeat against the same
+public node. Before the launch FLY_TOKEN is empty and the token block of the
+answer says so, so the page can show placeholders instead of an error.
 
 Nothing is written, no key is loaded, and there is no code path here that can
 sign anything. The site is a window, not a control panel.
+
+Environment:
+  FLY_BSC_RPC       BNB Chain JSON-RPC (default: the public Binance node)
+  FLY_WALLET        the fly's launch wallet, for the budget readout
+  FLY_TOKEN         the token contract once launched; empty until then
+  FLY_TOKEN_BLOCK   the launch block, so the log scan does not start at 0
 """
 import os
 import time
@@ -16,18 +22,14 @@ import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-RPC = os.environ.get("FLY_RH_RPC", "https://rpc.mainnet.chain.robinhood.com")
-CHAIN_ID = 4663
-WALLET = os.environ.get("FLY_WALLET",
-                        "0x6ce4085EfB52a6eBDb7d6989beb8860847f4b42A")
-TOKEN = os.environ.get("FLY_TOKEN",
-                       "0x4eb990547bce4a982432ca88cf5fae7eed1a2d35")
-# the wallet that made the first eight launches, still the fee recipient there
-WALLET_V1 = os.environ.get("FLY_WALLET_V1",
-                           "0x739Ccc9dd8Ed6412F00782927dbd087c4e72bFc3")
-# the block the token was launched in - scanning logs from 0 gets the public
-# node to answer 429, and there is nothing to find before this anyway
-BIRTH_BLOCK = int(os.environ.get("FLY_TOKEN_BLOCK", "59614342"))
+RPC = os.environ.get("FLY_BSC_RPC", "https://bsc-dataseed.binance.org")
+CHAIN_ID = 56
+CHAIN_NAME = "BNB Chain"
+WALLET = os.environ.get("FLY_WALLET", "")
+TOKEN = os.environ.get("FLY_TOKEN", "").strip().lower()
+BIRTH_BLOCK = int(os.environ.get("FLY_TOKEN_BLOCK", "0") or 0)
+# gas only: Flap charges no fixed creation fee on BNB Chain (docs/flap.md)
+LAUNCH_COST_BNB = float(os.environ.get("FLY_LAUNCH_COST_BNB", "0.001"))
 
 TRANSFER = ("0xddf252ad1be2c89b69c2b068fc378daa"
             "952ba7f163c4a11628f55a4df523b3ef")
@@ -39,7 +41,6 @@ app.add_middleware(
 
 _cache = {"at": 0.0, "data": None}
 TTL = 20.0
-# the log scan is the expensive call; hold it far longer than the rest
 _hold = {"at": 0.0, "val": (None, None)}
 HOLD_TTL = 300.0
 
@@ -49,7 +50,7 @@ def _holders_cached(token):
     if now - _hold["at"] < HOLD_TTL:
         return _hold["val"]
     v = holders(token)
-    if v[0] is not None:              # keep the last good answer on a 429
+    if v[0] is not None:
         _hold.update(at=now, val=v)
         return v
     return _hold["val"]
@@ -83,13 +84,7 @@ def call_str(to, selector):
 
 
 def holders(token):
-    """
-    Unique addresses that have ever received the token.
-
-    Counted from Transfer logs rather than trusted to an indexer. It is an
-    upper bound on holders - an address that sold everything still shows - so
-    the site labels it as addresses touched, not holders.
-    """
+    """Unique addresses that have ever received the token, from Transfer logs."""
     try:
         logs = rpc("eth_getLogs", [{"address": token,
                                     "fromBlock": hex(BIRTH_BLOCK),
@@ -111,34 +106,39 @@ def state():
     if _cache["data"] and now - _cache["at"] < TTL:
         return _cache["data"]
 
-    out = {"chain": {"name": "Robinhood Chain", "id": CHAIN_ID, "rpc": RPC},
-           "ok": True, "error": None}
+    out = {"chain": {"name": CHAIN_NAME, "id": CHAIN_ID, "rpc": RPC},
+           "ok": True, "error": None, "launched": bool(TOKEN)}
     try:
         out["chain"]["block"] = as_int(rpc("eth_blockNumber", []))
         out["chain"]["gas_gwei"] = round(as_int(rpc("eth_gasPrice", [])) / 1e9, 4)
 
-        bal = as_int(rpc("eth_getBalance", [WALLET, "latest"]))
-        old = as_int(rpc("eth_getBalance", [WALLET_V1, "latest"]))
-        out["wallet"] = {
-            "address": WALLET, "eth": bal / 1e18,
-            "launches_left": int(bal / 1e18 / 0.00055),
-            "previous": {"address": WALLET_V1, "eth": old / 1e18},
-        }
+        if WALLET:
+            bal = as_int(rpc("eth_getBalance", [WALLET, "latest"]))
+            out["wallet"] = {
+                "address": WALLET, "bnb": bal / 1e18,
+                "launches_left": int(bal / 1e18 / LAUNCH_COST_BNB),
+            }
+        else:
+            out["wallet"] = None
 
-        sup = as_int(rpc("eth_call", [{"to": TOKEN, "data": "0x18160ddd"},
-                                      "latest"]))
-        h, transfers = _holders_cached(TOKEN)
-        out["token"] = {
-            "address": TOKEN,
-            "name": call_str(TOKEN, "0x06fdde03"),
-            "symbol": call_str(TOKEN, "0x95d89b41"),
-            "supply": sup / 1e18,
-            "addresses_touched": h,
-            "transfers": transfers,
-            "pair": "GOOGL",
-            "creator_tax_pct": 1,
-            "url": f"https://www.ponsfamily.com/launchpad/{TOKEN}",
-        }
+        if TOKEN:
+            sup = as_int(rpc("eth_call", [{"to": TOKEN, "data": "0x18160ddd"},
+                                          "latest"]))
+            h, transfers = _holders_cached(TOKEN)
+            out["token"] = {
+                "address": TOKEN,
+                "name": call_str(TOKEN, "0x06fdde03"),
+                "symbol": call_str(TOKEN, "0x95d89b41"),
+                "supply": sup / 1e18,
+                "addresses_touched": h,
+                "transfers": transfers,
+                "pair": "BNB",
+                "creator_tax_pct": 0,
+                "url": f"https://flap.sh/bnb/{TOKEN}",
+                "explorer": f"https://bscscan.com/token/{TOKEN}",
+            }
+        else:
+            out["token"] = None
     except Exception as exc:
         out["ok"] = False
         out["error"] = str(exc)[:200]

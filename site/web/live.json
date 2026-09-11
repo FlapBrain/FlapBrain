@@ -1,4 +1,9 @@
 {
  "stream": null,
- "at": 0
+ "at": 0,
+ "launch": {
+  "state": "not_launched",
+  "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
+  "url": ""
+ }
 }

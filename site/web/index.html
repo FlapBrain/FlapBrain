@@ -338,14 +338,33 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
   .br{padding-top:10px;padding-bottom:26px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* the launch banner: hidden unless live.json says launching / launched */
+.launch{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:center;
+  gap:18px;padding:12px 18px;font-family:var(--mono,ui-monospace,monospace);font-size:14px;
+  letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--line,#2a2a2a)}
+.launch[hidden]{display:none}
+.launch.on{background:#d8ff3a;color:#0a0a0a}
+.launch.on a{color:#0a0a0a;font-weight:700;text-decoration:underline}
+.launch.done{background:#101a10;color:#b7f0b7}
+.launch.done a{color:#d8ff3a}
+.launch .dot{width:10px;height:10px;border-radius:50%;background:#e0202a;animation:lpulse 1.1s infinite}
+.launch.done .dot{background:#5fd35f;animation:none}
+@keyframes lpulse{0%,100%{opacity:1}50%{opacity:.25}}
+@media (max-width:600px){.launch{font-size:12px;letter-spacing:.08em;flex-wrap:wrap;gap:8px}}
 </style>
 </head>
 <body>
+<div id="launch-banner" class="launch" hidden>
+  <span class="dot"></span>
+  <span id="launch-text">THE FLY IS LAUNCHING ITS TOKEN</span>
+  <a id="launch-link" href="#" target="_blank" rel="noopener" hidden>watch live →</a>
+</div>
 
 <div class="plate">
   <canvas id="fly" aria-label="A fruit fly drawn as a cloud of points"></canvas>
   <div class="corner tl">specimen<br><span style="color:var(--ink-dim)">male CNS v1.0</span></div>
-  <div class="corner tr">Robinhood Chain<br><span id="blk" style="color:var(--ink-dim)">block —</span></div>
+  <div class="corner tr">BNB Chain<br><span id="blk" style="color:var(--ink-dim)">block —</span></div>
   <div class="corner bl">165,122 neurons<br><span style="color:var(--ink-dim)">10,228,000 connections</span></div>
   <div class="corner br"><span class="tick" id="livedot">●</span> observed live<br><span id="upd" style="color:var(--ink-dim)">—</span></div>
   <div class="title">
@@ -521,16 +540,16 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 <section>
   <div class="wrap">
     <div class="eyebrow">on-chain</div>
-    <h2>$FLYBRAIN</h2>
-    <p class="lede">Launched by the fly, from the fly's own wallet, on Robinhood Chain. Read the receipt yourself rather than taking this page's word for it.</p>
+    <h2 id="t-h2">$FLYBRAIN</h2>
+    <p class="lede" id="t-lede">To be launched by the fly, from the fly's own wallet, on BNB Chain through flap.sh. Nothing exists on chain yet; when it does, read the receipt yourself rather than taking this page's word for it.</p>
     <div class="scroll"><table>
-      <tr><th>Contract</th><td class="addr" id="t-ca">—</td></tr>
-      <tr><th>Paired</th><td class="num" id="t-pair">—</td></tr>
-      <tr><th>Creator tax</th><td class="num" id="t-tax">—</td></tr>
-      <tr><th>Supply</th><td class="num" id="t-sup">—</td></tr>
-      <tr><th>Chain</th><td class="num">Robinhood Chain · id 4663</td></tr>
+      <tr><th>Contract</th><td class="addr" id="t-ca">not launched yet</td></tr>
+      <tr><th>Quote</th><td class="num" id="t-pair">BNB</td></tr>
+      <tr><th>Tax</th><td class="num" id="t-tax">0 % (non-tax token)</td></tr>
+      <tr><th>Supply</th><td class="num" id="t-sup">1,000,000,000 at launch</td></tr>
+      <tr><th>Chain</th><td class="num">BNB Chain · id 56</td></tr>
     </table></div>
-    <p style="margin-top:22px"><a id="t-link" href="https://www.ponsfamily.com/launchpad">open on the launchpad</a></p>
+    <p style="margin-top:22px"><a id="t-link" href="https://flap.sh">open on flap.sh</a></p>
   </div>
 </section>
 
@@ -539,12 +558,13 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
     <div class="eyebrow">what is not real, stated plainly</div>
     <h2>The parts that aren't the fly</h2>
     <ul class="plain">
-      <li><b>The fly does not fill the whole form.</b> It reliably gets the description, often the ticker, rarely the name. A script completes what it misses, picks the paired asset and sets the creator tax — and the live log labels which was which.</li>
+      <li><b>The fly does not fill the whole form.</b> On some runs it fills none of the three fields, on others one or two. A script completes what it misses, confirms the image crop and presses the site's Create button — and the live log labels which was which.</li>
       <li><b>It cannot read.</b> 892 columns is roughly a 30&times;30 pixel view. Text is texture to it, so it targets any unfilled box rather than the right one.</li>
       <li><b>Light mode blinds it.</b> Its retina is a luminance map and all of its tuning was done against dark interfaces. On a light page it filled 0 of 3 fields; on a dark one, 2 of 3. That gap is the clearest evidence the eye is doing real work.</li>
       <li><b>It has no goals.</b> A fly brain has no language and no plan. It cannot read a page, form a view about a coin, or write a note. Releasing it means nobody is steering, not that it decided anything.</li>
       <li><b>The reward signal is invented.</b> The circuit, the plasticity site and the direction of the rule are all real and measured. What a fly is rewarded <em style="font-style:italic">by</em> is sugar, not by reaching a web page &mdash; novelty stands in for it here, and that is a choice a person made.</li>
-      <li><b>It roams inside a fence.</b> An allowlist keeps it on Robinhood Chain and pons. That is a choice, not a limit of the fly &mdash; one environment variable takes the fence down, and an unfenced random clicker on a public stream is a bad idea for reasons that have nothing to do with the brain.</li>
+      <li><b>It roams inside a fence.</b> An allowlist keeps it on a short list of link-rich sites. That is a choice, not a limit of the fly &mdash; one environment variable takes the fence down, and an unfenced random clicker on a public stream is a bad idea for reasons that have nothing to do with the brain.</li>
+      <li><b>The launch is one signature, and a person arms it.</b> The fly's contribution ends at the form and the Create button. The transaction is signed in Python only after a human has funded the wallet and set one flag by hand, and this page cannot do either.</li>
     </ul>
   </div>
 </section>
@@ -552,12 +572,12 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 <footer>
   <div class="wrap">
     <div class="links">
-      <a href="https://github.com/fruitflydev/flycoinrh">source</a>
-      <a href="https://x.com/fruitflydev">@fruitflydev</a>
-      <a id="f-scan" href="https://robinhoodchain.blockscout.com">explorer</a>
+      <a href="https://github.com/sami-openlive/flycoinrh">source</a>
+      <a href="https://github.com/fruitflydev/flycoinrh">forked from fruitflydev/flycoinrh</a>
+      <a id="f-scan" href="https://bscscan.com">explorer</a>
     </div>
     <div><span class="pill"><span class="pip" id="pip"></span><span id="pip-t">reading the chain</span></span></div>
-    <p style="margin-top:22px;max-width:66ch">Connectome data &copy; HHMI Janelia FlyEM, the Cambridge Connectomics Group and Google Research, released CC-BY. Simulation after Shiu et&nbsp;al. 2024 and Lappalainen et&nbsp;al. 2024. Not affiliated with any of them, nor with pons or Robinhood. $FLYBRAIN is an art experiment, not an investment.</p>
+    <p style="margin-top:22px;max-width:66ch">Connectome data &copy; HHMI Janelia FlyEM, the Cambridge Connectomics Group and Google Research, released CC-BY. Simulation after Shiu et&nbsp;al. 2024 and Lappalainen et&nbsp;al. 2024. Code MIT, forked from fruitflydev/flycoinrh. Not affiliated with any of them, nor with Flap or Binance. $FLYBRAIN is an art experiment, not an investment.</p>
   </div>
 </footer>
 
@@ -679,11 +699,14 @@ draw();
    and is a count of addresses that have ever received the token, not of
    current holders.
 --------------------------------------------------------------------------- */
-const RPC     = 'https://rpc.mainnet.chain.robinhood.com';
-const TOKEN   = '0x4eb990547bce4a982432ca88cf5fae7eed1a2d35';
-const BIRTH   = '0x38DA606';        // the block the token launched in
+/* BNB Chain. TOKEN is empty until the launch; then it is the contract the
+   fly created through flap.sh, and everything below fills in from the chain.
+   The launch state (not launched / launching / launched) also lives in
+   live.json next to this file, so it can be flipped without a redeploy. */
+const RPC     = 'https://bsc-dataseed.binance.org';
+let   TOKEN   = '';                 // set after the launch
 const TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-const FEE_ETH = 0.00055;
+const FEE_BNB = 0.001;              // gas only; Flap charges no creation fee
 
 const $ = id => document.getElementById(id);
 const nf = (v, d=0) => v==null ? '—' : Number(v).toLocaleString(undefined,
@@ -707,17 +730,29 @@ function abiString(x){
 }
 
 function render(d){
-  $('blk').textContent = 'block ' + nf(d.block);
+  // the Vercel function answers block at the top level, the Railway service
+  // nests it under chain; accept both
+  const block = d.block != null ? d.block : (d.chain && d.chain.block);
+  $('blk').textContent = 'block ' + nf(block);
   const t = d.token;
-  $('t-ca').textContent = t.address;
-  $('t-pair').textContent = t.pair;
-  $('t-tax').textContent = t.creator_tax_pct.toFixed(2) + ' %';
-  $('t-sup').textContent = nf(t.supply) + ' ' + t.symbol;
-  $('t-link').href = 'https://www.ponsfamily.com/launchpad/' + t.address;
-  $('f-scan').href = 'https://robinhoodchain.blockscout.com/token/' + t.address;
+  if (t && t.address){
+    TOKEN = t.address;
+    $('t-ca').textContent = t.address;
+    $('t-pair').textContent = t.pair || 'BNB';
+    $('t-tax').textContent = (t.creator_tax_pct || 0).toFixed(2) + ' %';
+    $('t-sup').textContent = nf(t.supply) + ' ' + (t.symbol || '');
+    $('t-link').href = 'https://flap.sh/bnb/' + t.address;
+    $('t-link').textContent = 'open on flap.sh';
+    $('f-scan').href = 'https://bscscan.com/token/' + t.address;
+    $('t-lede').textContent = 'Launched by the fly, from the fly\'s own wallet, on BNB Chain through flap.sh. Read the receipt yourself rather than taking this page\'s word for it.';
+    $('ca-text').textContent = t.address;
+  } else {
+    // not launched: the placeholders in the markup stay as they are
+    $('ca-text').textContent = 'not launched yet';
+  }
   $('upd').textContent = new Date().toISOString().slice(11,19) + ' UTC';
   $('pip').classList.remove('stale');
-  $('pip-t').textContent = 'read from Robinhood Chain';
+  $('pip-t').textContent = 'read from BNB Chain';
 }
 
 /* The proxy first, because the public node's CORS header is intermittently
@@ -730,16 +765,17 @@ async function readChain(){
     if (d && d.ok) { render(d); return; }
   } catch (e) { /* fall through */ }
 
-  // token facts only - the fly's wallet address lives in the proxy, not here
-  const [blk, sup, sym] = await Promise.all([
-    rpc('eth_blockNumber', []),
+  // no proxy (a static preview, or a file): read the chain directly
+  const blk = await rpc('eth_blockNumber', []);
+  if (!TOKEN){ render({block:int(blk), token:null}); return; }
+  const [sup, sym] = await Promise.all([
     rpc('eth_call', [{to:TOKEN, data:'0x18160ddd'}, 'latest']),
     rpc('eth_call', [{to:TOKEN, data:'0x95d89b41'}, 'latest']),
   ]);
-  render({block:int(blk), budget_eth:null,
+  render({block:int(blk),
           token:{address:TOKEN, symbol:abiString(sym),
                  supply:Number(BigInt(sup))/1e18, holders:null,
-                 transfers:null, pair:'GOOGL', creator_tax_pct:1}});
+                 transfers:null, pair:'BNB', creator_tax_pct:0}});
 }
 
 async function tick(){
@@ -758,10 +794,12 @@ async function tick(){
   const btn = document.getElementById('ca-copy');
   const lab = document.getElementById('ca-copy-t');
   const live = document.getElementById('ca-live');
-  document.getElementById('ca-text').textContent = TOKEN;
+  document.getElementById('ca-text').textContent = TOKEN || 'not launched yet';
   let timer = null;
   btn.addEventListener('click', async () => {
     let ok = true;
+    if (!TOKEN){ lab.textContent = 'nothing to copy yet'; live.textContent = 'not launched yet';
+      clearTimeout(timer); timer = setTimeout(() => { lab.textContent = 'Copy'; }, 1600); return; }
     try { await navigator.clipboard.writeText(TOKEN); }
     catch (e) {
       const ta = document.createElement('textarea');
@@ -1020,32 +1058,71 @@ let tickN = 0;
 /* The fly has a permanent home now: a Railway service that stays up when
    nobody's desk is on. It is tried first. The tunnel address in live.json is
    only the fallback, for when the fly is being run from a laptop. */
-const STABLE_STREAM = 'https://flybrain-production-2b26.up.railway.app';
+/* Set this to your own always-on roamer (a Railway/Fly/anything URL that
+   answers /status and /ws). Empty means: rely on live.json alone. */
+const STABLE_STREAM = '';
 async function findStableStream(){
-  try {
-    const r = await fetch(STABLE_STREAM + '/status', {cache: 'no-store'});
-    if (r.ok){
-      const d = await r.json();
-      if (d && d.running) return STABLE_STREAM;
-    }
-  } catch (e) {}
+  if (STABLE_STREAM) {
+    try {
+      const r = await fetch(STABLE_STREAM + '/status', {cache: 'no-store'});
+      if (r.ok){
+        const d = await r.json();
+        if (d && d.running) return STABLE_STREAM;
+      }
+    } catch (e) {}
+  }
   return await findStream();
 }
 
-async function findStream(){
-  try {
-    /* Read from the repo, not from this deployment: the fly writes the
-       address there and this page is only redeployed when someone deploys
-       it. The minute-keyed query keeps the CDN copy from going stale. */
-    const src = 'https://raw.githubusercontent.com/fruitflydev/flycoinrh/main/site/web/live.json';
-    const r = await fetch(src + '?t=' + Math.floor(Date.now()/60000));
-    if (!r.ok) return null;
-    const d = await r.json();
-    if (!d.stream) return null;
-    if (d.at && (Date.now()/1000 - d.at) > 21600) return null;   // stale address
-    return d.stream;
-  } catch (e) { return null; }
+/* live.json: the roamer's address, and the launch state for the banner.
+   Read from the repo first (the fly writes the address there and this page
+   is only redeployed when someone deploys it), then from this deployment. */
+const LIVE_SOURCES = [
+  'https://raw.githubusercontent.com/sami-openlive/flycoinrh/main/site/web/live.json',
+  'live.json',
+];
+async function readLive(){
+  for (const src of LIVE_SOURCES){
+    try {
+      const r = await fetch(src + '?t=' + Math.floor(Date.now()/60000), {cache:'no-store'});
+      if (r.ok) return await r.json();
+    } catch (e) {}
+  }
+  return null;
 }
+
+async function findStream(){
+  const d = await readLive();
+  if (!d || !d.stream) return null;
+  if (d.at && (Date.now()/1000 - d.at) > 21600) return null;   // stale address
+  return d.stream;
+}
+
+/* The launch banner. live.json → launch.state is one of
+   "not_launched" (nothing shown), "launching" (the banner, pointing at the
+   stream), "launched" (a quieter line pointing at the token). Flipping it is
+   a one-line edit to live.json - no code change, no redeploy of the page. */
+async function launchTick(){
+  const d = await readLive();
+  const L = (d && d.launch) || {};
+  const el = $$('launch-banner');
+  const a = $$('launch-link');
+  if (L.state === 'launching'){
+    el.hidden = false; el.className = 'launch on';
+    $$('launch-text').textContent = L.banner || 'THE FLY IS LAUNCHING ITS TOKEN';
+    if (L.url){ a.href = L.url; a.hidden = false; a.textContent = 'watch live →'; }
+    else a.hidden = true;
+  } else if (L.state === 'launched'){
+    el.hidden = false; el.className = 'launch done';
+    $$('launch-text').textContent = L.banner || 'THE TOKEN IS LIVE';
+    if (L.url){ a.href = L.url; a.hidden = false; a.textContent = 'open it →'; }
+    else a.hidden = true;
+  } else {
+    el.hidden = true;
+  }
+}
+launchTick();
+setInterval(launchTick, 30000);
 
 async function roamTick(){
   if (sock && sock.readyState === 1) return;      // already watching
