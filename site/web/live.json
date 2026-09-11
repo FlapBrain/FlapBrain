@@ -6,8 +6,8 @@
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
   "url": "",
   "block": "",
-  "agent": "彩排结束：dry。 录像在 build/recordings/。rig 仍在 localhost:4652 运行。",
-  "agent_at": 1789123629,
+  "agent": "待命：本机代理在线，等指令。",
+  "agent_at": 1789123989,
   "command": "",
   "command_at": 1789123508,
   "step": ""
