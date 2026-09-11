@@ -1,9 +1,9 @@
 {
- "stream": null,
- "at": 0,
+ "stream": "https://api.trycloudflare.com",
+ "at": 1789118633,
  "launch": {
   "state": "not_launched",
-  "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
+  "banner": "THE FLY IS LAUNCHING ITS TOKEN \u2014 watch it live",
   "url": ""
  }
 }
