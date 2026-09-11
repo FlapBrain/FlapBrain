@@ -119,7 +119,7 @@ async def main():
     if shutil.which("ffmpeg"):
         mp4 = OUT / f"flybrain-{stamp}.mp4"
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(webm),
-                        "-c:v", "libx264", "-preset", "slow", "-crf", "20",
+                        "-c:v", "libx264", "-preset", "fast", "-crf", "20",
                         "-pix_fmt", "yuv420p", str(mp4)], check=False)
         if mp4.exists():
             print(f"wrote {mp4}  ({mp4.stat().st_size/1e6:.1f} MB)")

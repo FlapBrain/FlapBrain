@@ -108,7 +108,8 @@ async def status():
         return {"wallet": acct.address, "sol": bnb, "unit": "BNB",
                 "venue": f"flap.sh ({MODE})",
                 "chain": f"BNB Chain {CHAIN_ID}",
-                "live": live_flag(env), "armed": browser_allowed()}
+                "live": live_flag(env), "armed": browser_allowed(),
+                "running": bool(STATE.get("running"))}
     except SystemExit:
         return {"wallet": None, "sol": 0, "unit": "BNB", "live": False,
                 "armed": browser_allowed()}
@@ -1065,7 +1066,13 @@ async def run(ws: WebSocket):
     try:
         while True:
             msg = json.loads(await ws.receive_text())
-            if msg.get("action") != "start" or STATE["running"]:
+            if msg.get("action") != "start":
+                continue
+            if STATE["running"]:
+                # one fly, one run at a time - say so instead of going quiet
+                await ws.send_text(json.dumps({
+                    "type": "done", "outcome": "busy",
+                    "msg": "a run is already in progress on this rig - wait for it to finish"}))
                 continue
             if not browser_allowed():
                 await ws.send_text(json.dumps({

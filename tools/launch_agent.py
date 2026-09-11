@@ -95,35 +95,64 @@ def preflight(cmd):
     return None
 
 
-def run_episode(cmd):
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = time.strftime("%Y%m%d-%H%M%S")
-    log = LOG_DIR / f"{cmd}-{stamp}.log"
-    env = load_env()
-    mode = env.get("FLY_FLAP_MODE", "site")
-    say(f"starting flaplive.py ({mode}) -> {log.name}")
-    with open(log, "w", encoding="utf-8") as fh:
-        rig = subprocess.Popen([PY, "-u", "flaplive.py", "--port", str(PORT)],
-                               cwd=ROOT, stdout=fh, stderr=subprocess.STDOUT)
+RIG_LOG = LOG_DIR / "flaplive.log"
+
+
+def rig_status():
+    # /status asks the chain for the balance and the rig is single-threaded,
+    # so while a run is on it can take several seconds to answer
     try:
-        for _ in range(90):
-            if f"open http://localhost:{PORT}" in log.read_text(encoding="utf-8", errors="replace"):
-                break
-            time.sleep(2)
-        else:
-            report(agent="失败：flaplive.py 没有启动（看 build/agent 日志）", command="")
-            return
-        report(state="launching" if cmd == "launch" else "not_launched",
-               agent=("发射中：大脑已加载，开始录像并按 START" if cmd == "launch"
-                      else "彩排中：大脑已加载，开始录像并按 START"), step="", command="")
-        rec = subprocess.Popen([PY, "-u", "record.py", "--port", str(PORT), "--timeout", "420"]
-                               + (["--dry"] if cmd != "launch" else []),
-                               cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        seen, done = set(), {}
-        t0 = time.time()
+        return requests.get(f"http://127.0.0.1:{PORT}/status", timeout=20).json()
+    except Exception:
+        return None
+
+
+def ensure_rig():
+    """
+    flaplive.py on :4652 - started here if nobody has, and left running
+    afterwards so it can be watched (and driven) at http://localhost:4652.
+    The agent never kills a rig; a person does that, if they want.
+    """
+    if rig_status():
+        say("rig already up on :4652, reusing it")
+        return True
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    say(f"starting flaplive.py -> {RIG_LOG.name}")
+    fh = open(RIG_LOG, "a", encoding="utf-8")
+    subprocess.Popen([PY, "-u", "flaplive.py", "--port", str(PORT)],
+                     cwd=ROOT, stdout=fh, stderr=subprocess.STDOUT)
+    for _ in range(90):
+        if rig_status():
+            return True
+        time.sleep(2)
+    return False
+
+
+def run_episode(cmd):
+    if not ensure_rig():
+        report(agent="失败：flaplive.py 没有启动（看 build/agent/flaplive.log）", command="")
+        return
+    # one fly, one run: if someone pressed START at localhost:4652, wait
+    for _ in range(100):
+        st = rig_status() or {}
+        if not st.get("running"):
+            break
+        report(agent="rig 上已有一次运行在进行（有人在 localhost:4652 按了 START），等它结束…")
+        time.sleep(6)
+    log = RIG_LOG
+    mark = len(log.read_text(encoding="utf-8", errors="replace")) if log.exists() else 0
+    report(state="launching" if cmd == "launch" else "not_launched",
+           agent=("发射中：大脑已加载，开始录像并按 START" if cmd == "launch"
+                  else "彩排中：大脑已加载，开始录像并按 START"), step="", command="")
+    rec = subprocess.Popen([PY, "-u", "record.py", "--port", str(PORT), "--timeout", "420"]
+                           + (["--dry"] if cmd != "launch" else []),
+                           cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    seen, done = set(), {}
+    t0 = time.time()
+    try:
         while rec.poll() is None and time.time() - t0 < 480:
             time.sleep(3)
-            txt = log.read_text(encoding="utf-8", errors="replace")
+            txt = log.read_text(encoding="utf-8", errors="replace")[mark:]
             for n in (1, 6, 12, 18):
                 m = re.search(rf"step {n-1:02d} ", txt)
                 if m and n not in seen:
@@ -142,8 +171,13 @@ def run_episode(cmd):
                 done["contract"] = m.group(1)
             if "DONE" in txt and "finish" not in seen:
                 seen.add("finish"); break
-        rec.wait(timeout=60)
-        txt = log.read_text(encoding="utf-8", errors="replace")
+        # record.py still has to finalise the webm and transcode the mp4;
+        # give it as long as it needs rather than tearing anything down
+        try:
+            rec.wait(timeout=900)
+        except subprocess.TimeoutExpired:
+            say("record.py is still transcoding; leaving it")
+        txt = log.read_text(encoding="utf-8", errors="replace")[mark:]
         outcome = re.search(r"DONE (\w+)", txt)
         outcome = outcome.group(1) if outcome else "unknown"
         if cmd == "launch" and done.get("contract") and done.get("status") == "SUCCESS":
@@ -161,12 +195,10 @@ def run_episode(cmd):
             asked = "page asked to send #1" in txt
             report(state="not_launched", step="",
                    agent=f"彩排结束：{outcome}" + ("，网站发出了 1 笔交易请求并被拒签。" if asked else "。")
-                         + " 录像在 build/recordings/。")
-    finally:
-        try:
-            rig.terminate(); rig.wait(timeout=15)
-        except Exception:
-            subprocess.run(["taskkill", "/PID", str(rig.pid), "/T", "/F"], capture_output=True)
+                         + " 录像在 build/recordings/。rig 仍在 localhost:4652 运行。")
+    except Exception as e:
+        say("episode error:", e)
+        report(agent=f"出错：{str(e)[:120]}（看 build/agent/flaplive.log）", step="")
 
 
 def main():
