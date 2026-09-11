@@ -143,6 +143,19 @@ deploy (workflow run, success in ~50 s), status all pass; an invalid CA is
 rejected before anything is written. Vercel's own Git integration is not
 used — it needs a GitHub login connection on your Vercel account.
 
+**8b. 一键发射 — 通过（彩排）.** `/admin` has 彩排 and 发射代币 buttons; they
+write `launch.command` into live.json and `tools/launch_agent.py` on this PC
+executes it. Tested 2026-09-11: `launch` while `FLY_RH_LIVE=0` → refused
+with the reason on the page; `rehearse` → flaplive + record.py started, steps
+reported 1 → 18, ended `彩排结束：dry`, video in `build/recordings/`. The
+agent never raises `FLY_RH_LIVE`; it lowers it to 0 after a launch.
+
+**8c. 税币 — 通过（模拟）.** Direct mode, `TOKEN_TAXED_V3`, 3 % buy / 3 % sell,
+beneficiary = the launch wallet: `eth_call` accepted, predicted address
+`…7777`. `.env` now carries this profile. **需要你决定**: the site copy still
+describes a non-tax token (0 % tax, LP fees to holders, FAQ "有税吗？非税币");
+if the tax token stays, that copy must change.
+
 **9. 未发射状态 — 通过（本地）.** With `FLY_TOKEN` unset the state service
 answers `launched: false, token: null` and the page shows "not launched yet"
 for the contract, `BNB` / `0 %` / `1,000,000,000 at launch`, a working

@@ -96,6 +96,31 @@ as `ARMED`. The rig **must be restarted** after editing `.env`.
 
 ## 4. Launch
 
+**The one-click way.** Keep the agent running on this machine:
+
+```bash
+py tools/launch_agent.py
+```
+
+then open https://flybrain-bsc.vercel.app/admin, log in with the launch
+wallet, and press **发射代币** (type `LAUNCH` to confirm). The agent checks
+`FLY_RH_LIVE=1`, `FLY_FLAP_COIN=launch` and the balance, refuses with the
+reason written back to the page if any fails, and otherwise starts
+`flaplive.py`, records with `record.py`, and reports every stage to the
+page: steps 1/6/12/18, the transaction request, the broadcast hash, the
+receipt, the contract. On success it flips the banner to `launched`, fills
+the CA, and sets `FLY_RH_LIVE` back to 0 by itself. **彩排（干跑）** runs the
+same flow with `FLY_RH_LIVE=0` (rehearsed 2026-09-11: refused launch while
+disarmed, then a full recorded dry run reported step by step).
+
+The launch profile in `.env` (set 2026-09-11): `FLY_FLAP_MODE=direct`,
+`FLY_FLAP_TOKEN=tax`, `FLY_FLAP_BUY_BPS=300`, `FLY_FLAP_SELL_BPS=300` — a
+3 % / 3 % tax token whose beneficiary is the launch wallet itself
+(`newTokenV6`, `TOKEN_TAXED_V3`, address ending 7777; simulated OK). For a
+non-tax token instead: `FLY_FLAP_MODE=site` and remove the three tax lines.
+
+**The manual way**, if the page is unavailable:
+
 Terminal 1 — the rig:
 
 ```bash
