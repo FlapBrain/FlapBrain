@@ -183,7 +183,7 @@ attribution to fruitflydev/flycoinrh (MIT), the CC-BY credit (and `NOTICE`
 untouched), and the "what is NOT real" section with this port's numbers.
 
 **19. Commits / push — 通过** (four commits; see the final report for the
-list and the URL `https://github.com/sami-openlive/flycoinrh`).
+list and the URL `https://github.com/FlapBrain/flycoinrh`).
 
 ## Open decisions, in one place
 
