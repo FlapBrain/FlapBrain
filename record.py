@@ -10,9 +10,11 @@ frames, the stepper and telemetry - at full resolution, with no desktop, no
 taskbar and no cursor of yours in shot.
 
 The rig must already be running:  py rhlive.py --port 4651
+                             or:  py flaplive.py --port 4652
 
   py record.py                 record whatever the rig is armed for
-  py record.py --dry           refuse to run if FLY_LIVE=1
+  py record.py --port 4652     the BNB Chain / flap.sh rig
+  py record.py --dry           refuse to run if the rig is armed
 """
 import argparse
 import asyncio
@@ -91,7 +93,8 @@ async def main():
             await page.wait_for_timeout(2000)
             outcome = await page.evaluate(
                 "() => document.getElementById('t-out').textContent.trim()")
-            if outcome in ("minted", "error", "dry run", "incomplete", "disarmed"):
+            if outcome in ("minted", "error", "dry run", "incomplete", "disarmed",
+                           "probed", "blocked", "clicked"):
                 break
             print(f"   ... {outcome}", end="\r", flush=True)
         print(f"\nrun finished: {outcome}")

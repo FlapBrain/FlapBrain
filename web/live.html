@@ -111,6 +111,19 @@
   #log span{color:var(--faint);margin-right:7px}
   #log a{color:var(--go)}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  /* a 1920x1080 stream source: the same layout, larger type so the log, the
+     descending-neuron rates and the telemetry read at OBS's downscale */
+  @media (min-width:1800px){
+    body{font-size:17px}
+    .brand h1{font-size:30px} .brand .tag{font-size:13px} .chip{font-size:15px}
+    button{font-size:17px} input{font-size:15px}
+    .hd .t,.hd .r{font-size:14px}
+    .readout .n{font-size:68px} .readout .u{font-size:14px}
+    .dn{font-size:15px;grid-template-columns:110px 1fr 52px}
+    .cell .k{font-size:13px} .cell .v{font-size:28px} .cell .v small{font-size:15px}
+    #t-target{font-size:22px!important} #t-out{font-size:15px!important}
+    #log{font-size:16px;line-height:1.5}
+  }
 </style>
 </head>
 <body>
