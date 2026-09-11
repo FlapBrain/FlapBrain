@@ -4,6 +4,7 @@
  "launch": {
   "state": "not_launched",
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
-  "url": ""
+  "url": "",
+  "block": ""
  }
 }
