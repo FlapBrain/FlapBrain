@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>FLYBRAIN admin</title>
+<style>
+  :root{--bg:#07080a;--panel:#0d1014;--line:#1e242b;--ink:#e6ebef;--dim:#8a96a3;--go:#d8ff3a;--warn:#ffb347;--bad:#ff5c5c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 ui-monospace,"IBM Plex Mono",Menlo,monospace}
+  .wrap{max-width:820px;margin:0 auto;padding:28px 18px 60px}
+  h1{font-size:20px;letter-spacing:.18em;text-transform:uppercase;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:12.5px;margin-bottom:26px}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:18px;margin-bottom:16px}
+  h2{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin:0 0 14px}
+  label{display:block;font-size:12px;color:var(--dim);letter-spacing:.08em;margin:12px 0 4px}
+  input,select{width:100%;background:#0a0c0f;color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:9px 11px;font:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--go)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  button{font:inherit;letter-spacing:.1em;text-transform:uppercase;padding:10px 18px;border-radius:3px;border:1px solid var(--line);background:#12161b;color:var(--ink);cursor:pointer}
+  button.go{background:var(--go);color:#0a0a0a;border-color:var(--go);font-weight:700}
+  button.warn{background:#2a1f08;color:var(--warn);border-color:#4a3810}
+  button:disabled{opacity:.45;cursor:default}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+  .msg{margin-top:10px;font-size:13px;white-space:pre-wrap;color:var(--dim)}
+  .msg.ok{color:var(--go)} .msg.bad{color:var(--bad)}
+  .runs div{font-size:12.5px;color:var(--dim);padding:4px 0;border-top:1px solid var(--line)}
+  .runs b{color:var(--ink)} .runs a{color:var(--go)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:99px;border:1px solid var(--line);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+  .pill.launching{background:var(--go);color:#0a0a0a;border-color:var(--go)}
+  .pill.launched{background:#102010;color:#8fe38f}
+  @media (max-width:600px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Flybrain · admin</h1>
+  <div class="sub">改的是仓库里的 <code>site/web/live.json</code>，页面运行时读取，改 CA 不需要重新部署。部署按钮只在改了代码时才需要。</div>
+
+  <section>
+    <h2>口令</h2>
+    <input id="tok" type="password" placeholder="ADMIN_TOKEN" autocomplete="current-password">
+    <div class="bar"><button id="load">载入当前状态</button><span id="who" class="msg"></span></div>
+  </section>
+
+  <section id="form" hidden>
+    <h2>代币 · <span id="state-pill" class="pill">—</span></h2>
+    <label>合约地址 CA（留空 = 未发射）</label>
+    <input id="contract" placeholder="0x…8888" spellcheck="false">
+    <div class="row">
+      <div><label>发射区块（可选）</label><input id="block" placeholder="121234567"></div>
+      <div><label>代币页（可选，留空自动 flap.sh/bnb/CA）</label><input id="token_page" placeholder="https://flap.sh/bnb/0x…"></div>
+    </div>
+
+    <h2 style="margin-top:22px">发射状态与横幅</h2>
+    <div class="row">
+      <div><label>状态</label>
+        <select id="state">
+          <option value="not_launched">not_launched — 不显示横幅</option>
+          <option value="launching">launching — 顶部黄色横幅，指向直播</option>
+          <option value="launched">launched — 绿色一行，指向代币页</option>
+        </select></div>
+      <div><label>横幅链接（直播 / 代币页）</label><input id="url" placeholder="https://…"></div>
+    </div>
+    <label>横幅文字</label>
+    <input id="banner" placeholder="THE FLY IS LAUNCHING ITS TOKEN — watch it live">
+
+    <h2 style="margin-top:22px">漫游流</h2>
+    <label>stream 地址（publish_live.py 会自动写；手动改也行，留空 = 离线）</label>
+    <input id="stream" placeholder="https://xxxx.trycloudflare.com" spellcheck="false">
+
+    <div class="bar">
+      <button id="save" class="go">保存到仓库</button>
+      <span id="save-msg" class="msg"></span>
+    </div>
+  </section>
+
+  <section id="deploy-box" hidden>
+    <h2>部署</h2>
+    <div class="sub" style="margin-bottom:6px">触发仓库的 <code>deploy site</code> 工作流：从 main 拉代码，<code>vercel deploy --prod</code>。约 1 分钟。</div>
+    <div class="bar">
+      <button id="deploy" class="warn">部署到生产</button>
+      <button id="refresh">刷新进度</button>
+      <span id="deploy-msg" class="msg"></span>
+    </div>
+    <div id="runs" class="runs"></div>
+  </section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const tokEl = $('tok');
+try { tokEl.value = localStorage.getItem('flybrain_admin') || ''; } catch (e) {}
+
+async function api(action, extra) {
+  const r = await fetch('/api/admin', { method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-admin-token': tokEl.value },
+    body: JSON.stringify({ action, ...(extra || {}) }) });
+  if (r.status === 401) throw new Error('口令不对');
+  return r.json();
+}
+function say(id, text, cls) { const e = $(id); e.textContent = text; e.className = 'msg ' + (cls || ''); }
+
+function fill(live) {
+  const L = live.launch || {};
+  $('contract').value = L.contract || '';
+  $('block').value = L.block || '';
+  $('token_page').value = L.token_page || '';
+  $('state').value = L.state || 'not_launched';
+  $('url').value = L.url || '';
+  $('banner').value = L.banner || '';
+  $('stream').value = live.stream || '';
+  const p = $('state-pill'); p.textContent = L.state || 'not_launched'; p.className = 'pill ' + (L.state || '');
+}
+
+$('load').onclick = async () => {
+  say('who', '…');
+  try {
+    const j = await api('get');
+    if (!j.ok) throw new Error(j.error);
+    try { localStorage.setItem('flybrain_admin', tokEl.value); } catch (e) {}
+    fill(j.live);
+    $('form').hidden = false; $('deploy-box').hidden = false;
+    say('who', '已载入 ' + j.repo + ' / site/web/live.json', 'ok');
+    refreshRuns();
+  } catch (e) { say('who', String(e.message || e), 'bad'); }
+};
+
+$('save').onclick = async () => {
+  $('save').disabled = true; say('save-msg', '写入仓库…');
+  try {
+    const patch = { stream: $('stream').value.trim() || null,
+      launch: { contract: $('contract').value.trim(), block: $('block').value.trim(),
+                token_page: $('token_page').value.trim(), state: $('state').value,
+                url: $('url').value.trim(), banner: $('banner').value.trim() } };
+    if (patch.launch.contract && !patch.launch.token_page)
+      patch.launch.token_page = 'https://flap.sh/bnb/' + patch.launch.contract.toLowerCase();
+    const j = await api('save', { patch, note: 'from /admin' });
+    if (!j.ok) throw new Error(j.error);
+    fill(j.live);
+    say('save-msg', '已提交 ' + (j.commit || '').slice(0, 7) + '。页面最多 1 分钟内读到新值。', 'ok');
+  } catch (e) { say('save-msg', String(e.message || e), 'bad'); }
+  $('save').disabled = false;
+};
+
+$('deploy').onclick = async () => {
+  if (!confirm('从 main 分支重新部署到生产？')) return;
+  $('deploy').disabled = true; say('deploy-msg', '触发中…');
+  try {
+    const j = await api('deploy', { note: 'admin button' });
+    if (!j.ok) throw new Error(j.error);
+    say('deploy-msg', '已触发（' + j.via + '）。下面的进度每 10 秒刷新。', 'ok');
+    let n = 0; const t = setInterval(() => { refreshRuns(); if (++n > 18) clearInterval(t); }, 10000);
+    setTimeout(refreshRuns, 3000);
+  } catch (e) { say('deploy-msg', String(e.message || e), 'bad'); }
+  $('deploy').disabled = false;
+};
+$('refresh').onclick = refreshRuns;
+
+async function refreshRuns() {
+  try {
+    const j = await api('status');
+    if (!j.ok) return;
+    $('runs').innerHTML = j.runs.map(r =>
+      `<div><b>${r.status}${r.conclusion ? ' · ' + r.conclusion : ''}</b> · ${r.event} · ${(r.started || '').replace('T', ' ').slice(0, 19)} · <a href="${r.url}" target="_blank" rel="noopener">日志</a></div>`
+    ).join('') || '<div>还没有部署记录</div>';
+  } catch (e) {}
+}
+</script>
+</body>
+</html>

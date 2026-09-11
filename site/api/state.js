@@ -8,9 +8,31 @@
 // `launched: false` and `token: null`, and the page shows placeholders.
 
 const RPC = process.env.FLY_BSC_RPC || 'https://bsc-dataseed.binance.org';
-const TOKEN = (process.env.FLY_TOKEN || '').trim().toLowerCase();
 const WALLET = process.env.FLY_WALLET || '';
-const BIRTH = process.env.FLY_TOKEN_BLOCK || '0x0';
+const REPO = process.env.GITHUB_REPO || 'FlapBrain/flycoinrh';
+const LIVE_URL = `https://raw.githubusercontent.com/${REPO}/main/site/web/live.json`;
+
+// The token address comes from live.json in the repo (what /admin edits),
+// with the env vars as a fallback - so updating the CA needs no redeploy.
+let liveCache = { at: 0, launch: null };
+async function launchInfo() {
+  if (Date.now() - liveCache.at < 60000 && liveCache.launch) return liveCache.launch;
+  let launch = null;
+  try {
+    const r = await fetch(LIVE_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' });
+    if (r.ok) launch = (await r.json()).launch || null;
+  } catch (e) { /* fall back to env */ }
+  liveCache = { at: Date.now(), launch: launch || {} };
+  return liveCache.launch;
+}
+function tokenOf(launch) {
+  const c = (launch && launch.contract) || process.env.FLY_TOKEN || '';
+  return String(c).trim().toLowerCase();
+}
+function birthOf(launch) {
+  const b = (launch && launch.block) || process.env.FLY_TOKEN_BLOCK || '0x0';
+  return /^\d+$/.test(String(b)) ? '0x' + Number(b).toString(16) : String(b);
+}
 const TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 // gas only: Flap charges no fixed creation fee on BNB Chain (docs/flap.md)
 const LAUNCH_COST_BNB = Number(process.env.FLY_LAUNCH_COST_BNB || '0.001');
@@ -39,9 +61,9 @@ function abiString(x) {
   return out;
 }
 
-async function holders() {
+async function holders(TOKEN, BIRTH) {
   const now = Date.now();
-  if (holdersCache.holders != null && now - holdersCache.at < HOLD_TTL) return holdersCache;
+  if (holdersCache.holders != null && now - holdersCache.at < HOLD_TTL && holdersCache.token === TOKEN) return holdersCache;
   try {
     const logs = await rpc('eth_getLogs', [{
       address: TOKEN, fromBlock: BIRTH, toBlock: 'latest', topics: [TRANSFER],
@@ -49,7 +71,7 @@ async function holders() {
     const seen = new Set();
     for (const l of logs) if (l.topics.length >= 3) seen.add('0x' + l.topics[2].slice(-40));
     seen.delete('0x' + '0'.repeat(40));
-    holdersCache = { at: now, holders: seen.size, transfers: logs.length };
+    holdersCache = { at: now, token: TOKEN, holders: seen.size, transfers: logs.length };
   } catch (e) { /* keep the last good numbers */ }
   return holdersCache;
 }
@@ -57,6 +79,9 @@ async function holders() {
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=60');
   try {
+    const launch = await launchInfo();
+    const TOKEN = tokenOf(launch);
+    const BIRTH = birthOf(launch);
     const blk = await rpc('eth_blockNumber', []);
     const out = {
       ok: true,
@@ -78,7 +103,7 @@ export default async function handler(req, res) {
         rpc('eth_call', [{ to: TOKEN, data: '0x95d89b41' }, 'latest']),
         rpc('eth_call', [{ to: TOKEN, data: '0x06fdde03' }, 'latest']),
       ]);
-      const h = await holders();
+      const h = await holders(TOKEN, BIRTH);
       out.token = {
         address: TOKEN,
         name: abiString(nm),

@@ -1,0 +1,47 @@
+# Deploy the public site (site/) to Vercel.
+#
+# Runs when the admin page presses "deploy" (workflow_dispatch), or when a
+# push to main changes the site's code. Editing live.json alone does not
+# trigger it - the page reads that file at runtime.
+#
+# Secrets on the repo: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
+name: deploy site
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: why
+        required: false
+        default: manual
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '!site/web/live.json'
+      - '.github/workflows/deploy.yml'
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install -g vercel@latest
+      - name: deploy to production
+        working-directory: site
+        run: |
+          echo "reason: ${{ github.event.inputs.reason || github.event_name }}"
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel deploy --prod --yes --token="$VERCEL_TOKEN" | tee deploy.log
+          echo "url=$(tail -1 deploy.log)" >> "$GITHUB_OUTPUT"
