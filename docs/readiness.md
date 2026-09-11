@@ -110,12 +110,25 @@ was switched off on the project so the page is public. Redeploy with
 and is gitignored.
 
 `flybrain.online` and `flybrain.vercel.app` are **the upstream author's**
-deployments and show the Robinhood token — not ours to change. The roaming
-service (the moving picture on the page) still needs a host of yours:
-`site/server/` and the Dockerfile are ready for Railway or any container
-host; until it exists the page shows "THE FLY IS BETWEEN RUNS" in that panel.
-`index.html` reads `live.json` from your fork for a stream address, so a
-laptop-run roamer with a tunnel would also work.
+deployments and show the Robinhood token — not ours to change.
+
+The roaming picture is streamed **from this machine** through a Cloudflare
+quick tunnel (verified live: the page's socket connects, 2 fps, the fly on
+Wikimedia Commons). Two processes have to stay up for it:
+
+```bash
+py roam.py                                  # the fly, :4660
+py tools/publish_live.py                    # tunnel :4660 -> *.trycloudflare.com,
+                                            # writes site/web/live.json, pushes
+```
+
+`publish_live.py` runs cloudflared itself (from `~/.claude/tools/cloudflared/`)
+and pushes the address only when it changes; on a restart the address
+changes and it pushes again. Stop it with Ctrl-C and it publishes "offline".
+roam.py's own tunnel code is not used: on current cloudflared it mistakes
+`api.trycloudflare.com` for the tunnel, and it would push to the upstream
+repo. For a picture that survives this PC being off, `site/server/` and the
+Dockerfile are ready for Railway or any container host — **需要你决定**.
 
 **9. 未发射状态 — 通过（本地）.** With `FLY_TOKEN` unset the state service
 answers `launched: false, token: null` and the page shows "not launched yet"
