@@ -8,7 +8,7 @@
   "block": "",
   "agent": "拒绝：FLY_RH_LIVE=0，未武装。在 .env 里改成 1 再按。",
   "agent_at": 1789121579,
-  "command": "",
-  "command_at": 1789121576
+  "command": "rehearse",
+  "command_at": 1789121599
  }
 }
