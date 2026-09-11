@@ -6,9 +6,10 @@
   "banner": "THE FLY IS LAUNCHING ITS TOKEN — watch it live",
   "url": "",
   "block": "",
-  "agent": "收到彩排指令，启动中…",
-  "agent_at": 1789121606,
+  "agent": "彩排中：大脑已加载，开始录像并按 START",
+  "agent_at": 1789121613,
   "command": "",
-  "command_at": 1789121599
+  "command_at": 1789121599,
+  "step": ""
  }
 }
