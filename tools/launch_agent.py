@@ -14,7 +14,7 @@ work:
              flips the banner to "launched", and sets FLY_RH_LIVE back to 0.
 
 The agent refuses and reports the reason if any check fails. It never edits
-FLY_RH_LIVE upward - a person does that, by hand, in .env.
+FLY_RH_LIVE in either direction - a person does that, by hand, in .env.
 
   py tools/launch_agent.py            poll every 5 s, forever
   py tools/launch_agent.py --once     handle one pending command and exit
@@ -209,16 +209,14 @@ def run_episode(cmd):
         outcome = re.search(r"DONE (\w+)", txt)
         outcome = outcome.group(1) if outcome else "unknown"
         if cmd == "launch" and done.get("contract") and done.get("status") == "SUCCESS":
-            set_live("0")
             report(state="launched", contract=done["contract"], block=done.get("block", ""),
                    tx=done.get("tx", ""), url=f"https://flap.sh/bnb/{done['contract']}",
                    token_page=f"https://flap.sh/bnb/{done['contract']}", step="",
-                   agent=f"已发射。FLY_RH_LIVE 已自动改回 0。结果 {outcome}。")
+                   agent=f"已发射。结果 {outcome}。FLY_RH_LIVE 保持为 1（按你的要求不自动关）。")
         elif cmd == "launch":
-            set_live("0")
             report(agent=f"发射未完成：{outcome}"
                          + (f"，tx {done.get('tx')}" if done.get("tx") else "")
-                         + "。FLY_RH_LIVE 已改回 0，看 build/agent 日志。", step="")
+                         + "。FLY_RH_LIVE 仍为 1，看 build/agent 日志。", step="")
         else:
             asked = "page asked to send #1" in txt
             report(state="not_launched", step="",
