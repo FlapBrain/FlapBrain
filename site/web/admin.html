@@ -39,7 +39,12 @@
   <div class="sub">改的是仓库里的 <code>site/web/live.json</code>，页面运行时读取，改 CA 不需要重新部署。部署按钮只在改了代码时才需要。</div>
 
   <section>
-    <h2>口令</h2>
+    <h2>登录</h2>
+    <div class="bar" style="margin-top:0">
+      <button id="wallet" class="go">连接 launch 钱包登录</button>
+      <span class="msg" style="margin-top:0">用导入了 launch 私钥的钱包（MetaMask 等）签一条消息，不花 gas、不发交易。</span>
+    </div>
+    <label>或者输入口令 ADMIN_TOKEN</label>
     <input id="tok" type="password" placeholder="ADMIN_TOKEN" autocomplete="current-password">
     <div class="bar"><button id="load">载入当前状态</button><span id="who" class="msg"></span></div>
   </section>
@@ -114,16 +119,40 @@ function fill(live) {
   const p = $('state-pill'); p.textContent = L.state || 'not_launched'; p.className = 'pill ' + (L.state || '');
 }
 
+async function loadAll(label) {
+  const j = await api('get');
+  if (!j.ok) throw new Error(j.error);
+  try { localStorage.setItem('flybrain_admin', tokEl.value); } catch (e) {}
+  fill(j.live);
+  $('form').hidden = false; $('deploy-box').hidden = false;
+  say('who', (label || '已登录') + ' · ' + j.repo + ' / site/web/live.json', 'ok');
+  refreshRuns();
+}
+
 $('load').onclick = async () => {
   say('who', '…');
+  try { await loadAll('口令登录'); } catch (e) { say('who', String(e.message || e), 'bad'); }
+};
+
+// Sign-in with the launch wallet: eth_requestAccounts -> nonce from the API
+// -> personal_sign -> the API recovers the signer and mints a session token.
+$('wallet').onclick = async () => {
+  say('who', '…');
   try {
-    const j = await api('get');
-    if (!j.ok) throw new Error(j.error);
-    try { localStorage.setItem('flybrain_admin', tokEl.value); } catch (e) {}
-    fill(j.live);
-    $('form').hidden = false; $('deploy-box').hidden = false;
-    say('who', '已载入 ' + j.repo + ' / site/web/live.json', 'ok');
-    refreshRuns();
+    const eth = window.ethereum;
+    if (!eth) throw new Error('浏览器里没有钱包扩展（MetaMask 等）');
+    const [addr] = await eth.request({ method: 'eth_requestAccounts' });
+    const n = await fetch('/api/admin', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'nonce', address: addr }) }).then(r => r.json());
+    if (!n.ok) throw new Error(n.error);
+    if (n.wallet && n.wallet !== addr.toLowerCase())
+      throw new Error('当前账户 ' + addr.slice(0, 6) + '…' + addr.slice(-4) + ' 不是 launch 钱包，请在钱包里切换到导入的那个账户');
+    const signature = await eth.request({ method: 'personal_sign', params: [n.message, addr] });
+    const l = await fetch('/api/admin', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'login', address: addr, ts: n.ts, nonce: n.nonce, signature }) }).then(r => r.json());
+    if (!l.ok) throw new Error(l.error);
+    tokEl.value = l.token;
+    await loadAll('钱包 ' + addr.slice(0, 6) + '…' + addr.slice(-4) + ' 已登录（12 小时有效）');
   } catch (e) { say('who', String(e.message || e), 'bad'); }
 };
 

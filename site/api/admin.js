@@ -12,17 +12,43 @@
 //   GITHUB_REPO       owner/name, default FlapBrain/flycoinrh
 //   DEPLOY_HOOK_URL   the project's deploy hook (main branch)
 
-import { timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual, createHmac } from 'node:crypto';
+import { verifyMessage } from 'ethers';
 
 const REPO = process.env.GITHUB_REPO || 'FlapBrain/flycoinrh';
 const PATH = 'site/web/live.json';
 const API = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
 
+// Two ways in: the ADMIN_TOKEN password, or a session minted by signing a
+// message with the launch wallet (ADMIN_WALLET). Sessions are stateless:
+// HMAC(address|expiry) keyed with ADMIN_TOKEN, valid for 12 hours.
+const SESSION_H = 12 * 3600 * 1000;
+const NONCE_MS = 5 * 60 * 1000;
+
+function hmac(s) { return createHmac('sha256', process.env.ADMIN_TOKEN || 'x').update(s).digest('hex'); }
+function safeEq(a, b) {
+  const A = Buffer.from(String(a)), B = Buffer.from(String(b));
+  return A.length === B.length && timingSafeEqual(A, B);
+}
+
 function authed(req) {
   const want = process.env.ADMIN_TOKEN || '';
   const got = String(req.headers['x-admin-token'] || '');
-  if (!want || want.length !== got.length) return false;
-  return timingSafeEqual(Buffer.from(want), Buffer.from(got));
+  if (!want) return false;
+  if (safeEq(want, got)) return true;
+  // session: "s.<address>.<exp>.<sig>"
+  const m = /^s\.(0x[0-9a-f]{40})\.(\d+)\.([0-9a-f]{64})$/i.exec(got);
+  if (!m) return false;
+  const [, addr, exp, sig] = m;
+  if (Number(exp) < Date.now()) return false;
+  if (addr.toLowerCase() !== String(process.env.ADMIN_WALLET || '').toLowerCase()) return false;
+  return safeEq(sig, hmac(`session|${addr.toLowerCase()}|${exp}`));
+}
+
+// The message the wallet signs. Includes a server-issued nonce (an HMAC of
+// the timestamp, so nothing has to be stored) and expires in five minutes.
+function loginMessage(addr, ts, nonce) {
+  return `FlapBrain admin login\n\nwallet: ${addr}\ntime: ${ts}\nnonce: ${nonce}\n\nSigning this costs nothing and sends no transaction.`;
 }
 
 async function gh(method, body) {
@@ -78,10 +104,39 @@ function merge(cur, patch) {
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'POST only' });
-  if (!authed(req)) return res.status(401).json({ ok: false, error: 'bad token' });
-
   const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
   const action = body.action;
+
+  // --- wallet login, no token needed for these two ------------------------
+  if (action === 'nonce') {
+    const addr = String(body.address || '').toLowerCase();
+    if (!/^0x[0-9a-f]{40}$/.test(addr)) return res.status(200).json({ ok: false, error: 'address?' });
+    const ts = Date.now();
+    const nonce = hmac(`nonce|${addr}|${ts}`).slice(0, 16);
+    return res.status(200).json({ ok: true, ts, nonce, message: loginMessage(addr, ts, nonce),
+      wallet: String(process.env.ADMIN_WALLET || '').toLowerCase() });
+  }
+  if (action === 'login') {
+    try {
+      const addr = String(body.address || '').toLowerCase();
+      const ts = Number(body.ts), nonce = String(body.nonce || '');
+      if (!/^0x[0-9a-f]{40}$/.test(addr)) throw new Error('address?');
+      if (!(Date.now() - ts < NONCE_MS && Date.now() - ts >= 0)) throw new Error('login expired, try again');
+      if (!safeEq(nonce, hmac(`nonce|${addr}|${ts}`).slice(0, 16))) throw new Error('bad nonce');
+      const want = String(process.env.ADMIN_WALLET || '').toLowerCase();
+      if (!want) throw new Error('ADMIN_WALLET is not set on the project');
+      if (addr !== want) throw new Error(`this wallet (${addr.slice(0, 6)}…${addr.slice(-4)}) is not the launch wallet`);
+      const recovered = verifyMessage(loginMessage(addr, ts, nonce), String(body.signature || '')).toLowerCase();
+      if (recovered !== addr) throw new Error('signature does not match the wallet');
+      const exp = Date.now() + SESSION_H;
+      const token = `s.${addr}.${exp}.${hmac(`session|${addr}|${exp}`)}`;
+      return res.status(200).json({ ok: true, token, exp, address: addr });
+    } catch (e) {
+      return res.status(200).json({ ok: false, error: String(e.message || e).slice(0, 160) });
+    }
+  }
+
+  if (!authed(req)) return res.status(401).json({ ok: false, error: 'bad token' });
   try {
     if (action === 'get') {
       const { data } = await readLive();

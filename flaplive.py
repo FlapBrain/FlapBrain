@@ -280,7 +280,7 @@ async def connect_wallet(page, send=None, shot=None):
         for _ in range(16):
             rb = await page.evaluate(
                 """() => { const e = [...document.querySelectorAll('*')]
-                     .find(x => x.children.length === 0 && (x.textContent||'').trim() === 'Flybrain'
+                     .find(x => x.children.length === 0 && (x.textContent||'').trim() === 'FlapBrain'
                                 && x.getBoundingClientRect().width > 0);
                    if (!e) return null; const r = e.getBoundingClientRect();
                    return {x: r.x, y: r.y, width: r.width, height: r.height}; }""")
@@ -288,7 +288,7 @@ async def connect_wallet(page, send=None, shot=None):
                 break
             await page.wait_for_timeout(500)
         if not rb:
-            await note("the wallet list did not show Flybrain")
+            await note("the wallet list did not show FlapBrain")
             return False
         await glide(page, rb["x"] + rb["width"] / 2, rb["y"] + rb["height"] / 2,
                     send, hold=0.4)

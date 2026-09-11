@@ -25,7 +25,7 @@ PROVIDER_JS = r"""
 (() => {
   const ADDR = "__ADDR__";
   const CHAIN_HEX = "__CHAIN_HEX__";
-  const RDNS = "xyz.flybrain.wallet";
+  const RDNS = "xyz.flapbrain.wallet";
 
   const listeners = {};
   const emit = (ev, ...a) => (listeners[ev] || []).forEach(f => {
@@ -69,7 +69,7 @@ PROVIDER_JS = r"""
 
   const provider = {
     isMetaMask: true,
-    isFlybrain: true,
+    isFlapBrain: true,
     chainId: CHAIN_HEX,
     networkVersion: String(parseInt(CHAIN_HEX, 16)),
     selectedAddress: ADDR,
@@ -97,7 +97,7 @@ PROVIDER_JS = r"""
   // EIP-6963 - complete, or not at all
   const info = {
     uuid: "6f1d2e3c-4b5a-4c7d-8e9f-0a1b2c3d4e5f",
-    name: "Flybrain",
+    name: "FlapBrain",
     icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjNjNlNmZmIi8+PC9zdmc+",
     rdns: RDNS,
   };
